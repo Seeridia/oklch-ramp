@@ -1,0 +1,26 @@
+{
+  "name": "color-scale-engine-playground",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vp dev",
+    "build": "vp build",
+    "check": "vp check",
+    "preview": "vp preview"
+  },
+  "dependencies": {
+    "@phosphor-icons/react": "2.1.10",
+    "color-scale-engine": "workspace:*",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.7",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "6.1.1",
+    "typescript": "6.0.3",
+    "vite": "8.2.2",
+    "vite-plus": "0.3.0"
+  }
+}

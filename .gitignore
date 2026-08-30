@@ -1,0 +1,13 @@
+node_modules/
+dist/
+preview-dist/
+coverage/
+.vite/
+.vitest/
+*.log
+.DS_Store
+
+# Local visual QA artifacts
+playground/*.png
+playground/design-qa.md
+playground/qa-compare.html

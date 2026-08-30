@@ -1,0 +1,67 @@
+{
+  "name": "color-scale-engine",
+  "version": "0.1.0",
+  "description": "Perceptual OKLCH color scales and semantic light/dark themes",
+  "keywords": [
+    "color",
+    "dark-mode",
+    "design-tokens",
+    "oklch",
+    "palette"
+  ],
+  "homepage": "https://github.com/Seeridia/color-scale-engine#readme",
+  "bugs": {
+    "url": "https://github.com/Seeridia/color-scale-engine/issues"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Seeridia/color-scale-engine.git"
+  },
+  "files": [
+    "dist",
+    "docs",
+    "CHANGELOG.md",
+    "README.md"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.mjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    }
+  },
+  "scripts": {
+    "benchmark": "vp pack && node scripts/benchmark.mjs",
+    "build": "vp pack",
+    "check": "vp check",
+    "coverage": "vp test run --coverage",
+    "demo": "pnpm --dir playground dev",
+    "demo:build": "pnpm --dir playground build",
+    "test": "vp test"
+  },
+  "dependencies": {
+    "culori": "4.0.2"
+  },
+  "devDependencies": {
+    "@types/culori": "4.0.1",
+    "@vitest/coverage-v8": "4.1.11",
+    "fast-check": "4.9.0",
+    "typescript": "6.0.3",
+    "vite-plus": "0.3.0"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "11.24.0",
+      "onFail": "download"
+    }
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
