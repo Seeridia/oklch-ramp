@@ -21,7 +21,7 @@ Perceptual color ramps and themes powered by OKLCH。OKRamp 是一个基于 Type
 pnpm add oklch-ramp
 ```
 
-已发布到 npm：[oklch-ramp](https://www.npmjs.com/package/oklch-ramp)。当前稳定版本为 `0.1.0`。
+已发布到 npm：[oklch-ramp](https://www.npmjs.com/package/oklch-ramp)。最新稳定版本以 npm 的 `latest` 为准。
 
 ## 快速开始
 

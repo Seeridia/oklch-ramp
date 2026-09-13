@@ -1,10 +1,10 @@
 name: Publish to npm
 
 on:
-  release:
-    types: [published]
-  # Manual runs validate and pack only; they never publish.
-  workflow_dispatch:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
 
 permissions:
   contents: read
@@ -14,8 +14,43 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  prepare:
+    if: >-
+      github.repository == 'Seeridia/oklch-ramp' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      actions: write
+    outputs:
+      publish: ${{ steps.prepare.outputs.publish }}
+      version: ${{ steps.prepare.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 0
+      - uses: voidzero-dev/setup-vp@v1
+        with:
+          version: 0.3.0
+          node-version: 24
+          run-install: false
+      - run: vp install --frozen-lockfile
+      - name: Create version PR or recognize its merge
+        id: prepare
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: node scripts/release/prepare.mjs
+
   publish:
-    if: github.repository == 'Seeridia/oklch-ramp'
+    needs: prepare
+    if: needs.prepare.outputs.publish == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -23,6 +58,8 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
       - uses: voidzero-dev/setup-vp@v1
         with:
           version: 0.3.0
@@ -33,28 +70,20 @@ jobs:
       - name: Install OIDC-capable npm CLI
         working-directory: ${{ runner.temp }}
         run: npm install --global npm@11.19.0
-      - name: Validate release version
-        id: release
+      - name: Check whether this version is already published
+        id: registry
         env:
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
-          IS_PRERELEASE: ${{ github.event.release.prerelease }}
+          RELEASE_VERSION: ${{ needs.prepare.outputs.version }}
         run: |
           node --input-type=module <<'NODE'
           import { readFileSync, appendFileSync } from 'node:fs';
           const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
-          if (pkg.name !== 'oklch-ramp' || pkg.private) {
-            throw new Error('Expected the public oklch-ramp package');
+          if (pkg.name !== 'oklch-ramp' || pkg.private || pkg.version !== process.env.RELEASE_VERSION) {
+            throw new Error('Release package does not match the merged PR');
           }
-          const prerelease = pkg.version.includes('-');
-          if (process.env.GITHUB_EVENT_NAME === 'release') {
-            if (process.env.RELEASE_TAG !== `v${pkg.version}`) {
-              throw new Error(`Release tag must be v${pkg.version}`);
-            }
-            if (prerelease !== (process.env.IS_PRERELEASE === 'true')) {
-              throw new Error('GitHub prerelease status must match the package version');
-            }
-          }
-          appendFileSync(process.env.GITHUB_OUTPUT, `tag=${prerelease ? 'next' : 'latest'}\n`);
+          const response = await fetch(`https://registry.npmjs.org/oklch-ramp/${pkg.version}`);
+          if (!response.ok && response.status !== 404) throw new Error(`Registry returned ${response.status}`);
+          appendFileSync(process.env.GITHUB_OUTPUT, `exists=${response.ok}\n`);
           NODE
       - run: vp install --frozen-lockfile
       # Workspace types resolve through dist/index.d.mts on a fresh checkout.
@@ -68,8 +97,8 @@ jobs:
         working-directory: ${{ runner.temp }}
         run: npm pack ./oklch-ramp.tgz --dry-run --ignore-scripts --json
       - name: Publish with npm Trusted Publishing
-        if: github.event_name == 'release'
+        if: steps.registry.outputs.exists != 'true'
         working-directory: ${{ runner.temp }}
         env:
-          DIST_TAG: ${{ steps.release.outputs.tag }}
+          DIST_TAG: latest
         run: npm publish ./oklch-ramp.tgz --ignore-scripts --access public --provenance --tag "$DIST_TAG" --registry=https://registry.npmjs.org/

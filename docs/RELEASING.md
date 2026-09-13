@@ -1,71 +1,48 @@
 # 发布 OKRamp 到 npm
 
-npm 包名为 `oklch-ramp`。自动发布由 `.github/workflows/publish.yml` 执行，使用 npm Trusted Publishing（OIDC），不需要 `NPM_TOKEN`。
+发布全部通过 CI 和版本 PR 完成，不创建 GitHub Release。
 
-## 工作流
+## 日常流程
 
-- `ci.yml`：PR 和 `main` 推送运行检查、测试、演示站构建和 library 打包。
-- `publish.yml`：发布 GitHub Release 时，检出该 Release 的标签，校验版本，运行上述检查，打包并发布 npm。
-- 在 Actions 页面手动运行 `Publish to npm` 只做构建与包内容预检，不会发布，也不验证 npm 授权或版本是否已被占用。
-- 正式版发布到 `latest`；包含 `-` 的预发布版本发布到 `next`，且 GitHub Release 必须勾选预发布。
-- 标签必须精确匹配根 `package.json`，例如版本 `0.1.1` 对应 `v0.1.1`。
+1. 将代码合并或推送到 `main`，等待 `CI` 成功。
+2. `publish.yml` 自动创建或更新 `automation/release` 分支上的版本 PR，修改根 `package.json`、`CHANGELOG.md` 和 `.release-state.json`。
+3. 审阅版本号与日志，等待版本 PR 的 CI 通过，再合并。推荐使用 squash merge，并保留 `release: automated` 标签及原分支名。
+4. 合并提交的 main CI 成功后，`publish.yml` 识别版本 PR，检出该提交重新验证、打包并发布到 npm `latest`。
 
-工作流通过官方 `voidzero-dev/setup-vp` 安装 Vite+ 0.3.0 和 Node.js 24，使用 `vp install` 安装依赖、`vp pack` 构建 library、`vp check` 检查、`vp test` 测试。先构建 library 再检查，确保全新检出时 workspace 包的类型声明已存在。底层包管理器仍为 pnpm 11.24.0，`vp pm pack` 转发 tarball 打包命令；`vp pack` 本身是 library 构建命令。npm 11.19.0 专门用于 OIDC 发布，npm 从临时目录发布生成的 tarball，避免项目 `devEngines.packageManager` 限制引发 `EBADDEVENGINES`。`prepack` 会自动构建，防止发布旧产物。
+版本 PR 不会自动合并。普通 main 提交只准备 PR，不直接发布 npm。当前 workspace 使用 `workspace:*` 引用核心包，版本修改不需要改动锁文件；私有 playground 的版本独立于 npm 包。README 不硬编码最新版本。
 
-## 发布状态
+## 版本与日志
 
-`oklch-ramp@0.1.0` 已发布到 npm，GitHub 工作流已启用。现有仓库后续发版直接参考「日常发版」；下面保留首次配置步骤，供维护者迁移或重新绑定 Trusted Publisher 时使用。
+- `feat:` / `feat(scope):` 升 minor。
+- `fix:` 以及其他普通提交升 patch。
+- `type!:` 或提交正文中的 `BREAKING CHANGE:` 升 major；0.x 阶段升 minor。
+- 版本 PR 汇总上次基线之后的提交标题与链接。请使用准确的提交标题。
+- `.release-state.json` 的 `baseSha` 记录已纳入版本 PR 的 main 提交。仅变更版本、锁文件、Changelog 和该状态文件的提交不再触发下一轮 PR，避免循环。
+- 当前自动流程仅发布稳定版本；不要手动将版本改成预发布字符串。
 
-## 一次性设置
+## GitHub 与 npm 配置
 
-1. 将源码、锁文件和工作流提交并推送到 `Seeridia/oklch-ramp`。在 Actions 手动运行一次 `Publish to npm` 验证 Linux 环境。
-2. 若 npm 尚无此包，先在本地登录 npm 并发布首个版本。账号需要满足 npm 的邮箱验证和双因素认证要求。
+仓库 Actions 设置需允许 GitHub Actions 创建 PR。工作流按 job 授予写入分支、PR、标签和手动触发 CI 的权限，发布 job 仅有读取源码及 `id-token: write`。
 
-   ```bash
-   cd /tmp
-   npm login --registry=https://registry.npmjs.org/
-   cd /Users/seeridia/Documents/色阶
-   vp pack
-   vp check
-   vp test
-   vp pm pack --out /tmp/oklch-ramp-initial.tgz
-   cd /tmp
-   npm publish ./oklch-ramp-initial.tgz --ignore-scripts --access public --registry=https://registry.npmjs.org/
-   ```
+机器人使用 `GITHUB_TOKEN` 创建的 PR 不会自动触发普通 PR CI，因此流程会显式 dispatch `ci.yml` 到版本分支。主分支发版仍只接受成功的 push CI，不接受 PR 或手动 CI 作为 npm 发布触发。
 
-3. 打开 npm 的 `oklch-ramp` 包设置，添加 GitHub Actions Trusted Publisher：
+npm Trusted Publisher 保持：
 
-   | 字段                 | 值            |
-   | -------------------- | ------------- |
-   | Organization or user | `Seeridia`    |
-   | Repository           | `oklch-ramp`  |
-   | Workflow filename    | `publish.yml` |
-   | Environment name     | 留空          |
+| 字段                 | 值            |
+| -------------------- | ------------- |
+| Organization or user | `Seeridia`    |
+| Repository           | `oklch-ramp`  |
+| Workflow filename    | `publish.yml` |
+| Environment name     | 留空          |
 
-   若页面提供 Allowed actions，允许直接 `npm publish`。工作流没有使用 GitHub Environment，文件名只填写 `publish.yml`，不要填写完整路径。字段大小写必须一致。
+使用 Vite+ 0.3.0、Node.js 24 和 npm OIDC 发布，无需 NPM_TOKEN。npm CLI 从临时目录发布 tarball，避免 workspace 的包管理器限制。
 
-4. 后续版本通过 GitHub Release 发布。首次本地已发布 `0.1.0` 时，下次自动发布应使用新版本，例如 `0.1.1`，不要再次发布 `0.1.0`。
+## 失败与重试
 
-## 日常发版
+- CI 失败：修复对应提交；尚未通过检查时不会创建版本 PR 或发布。
+- 创建 PR 失败：检查 Actions 创建 PR 的仓库权限，然后重跑失败的 `Publish to npm`。
+- npm 发布失败：修复授权或网络问题后重跑失败的 workflow；无需创建 Release。
+- 已存在的 npm 版本会跳过发布，避免覆盖。npm 接受上传后可能需要几分钟才能在 registry 查询到。
+- 若 main 已前进，旧 CI 不再更新版本 PR；版本 PR 合并提交的发布仍使用其经过 CI 的确切 SHA。
 
-1. 修改根 `package.json` 的版本，并更新 `CHANGELOG.md`。更新依赖时同步 `pnpm-lock.yaml`。
-2. 提交并推送改动到 `main`，等待 CI 成功。
-3. 在 GitHub Releases 创建新 Release，标签为 `v<版本>`，目标选择包含版本改动的提交，填写发布说明后发布。
-4. 查看 Actions 中的 `Publish to npm`。成功后在 npm 核对：
-
-   ```bash
-   cd /tmp
-   npm view oklch-ramp version --registry=https://registry.npmjs.org/
-   npm view oklch-ramp dist-tags --registry=https://registry.npmjs.org/
-   ```
-
-例如 `0.2.0-beta.1` 对应标签 `v0.2.0-beta.1`，GitHub 勾选预发布，用户通过 `pnpm add oklch-ramp@next` 安装。
-
-## 排错
-
-- 认证失败：核对 npm Trusted Publisher 的仓库、文件名、Allowed actions；工作流需要 GitHub 托管 runner 和 `id-token: write` 权限。
-- 版本已存在：npm 不允许覆盖同一版本。如果已成功发布，勿直接重跑发布步骤；有新改动时递增版本再发版。
-- 标签或预发布状态不符：使 Release 标签、根包版本和 GitHub 预发布选项一致。
-- 普通检查失败：修复后用新的发布提交和标签重试，确认最终发布源码可追溯。
-
-参考：[npm Trusted Publishing 官方文档](https://docs.npmjs.com/trusted-publishers/)。
+参考：[npm Trusted Publishing](https://docs.npmjs.com/trusted-publishers/)。
