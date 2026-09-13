@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.1
+
+- ci: automate version PRs and publish npm after merge ([261398d](https://github.com/Seeridia/oklch-ramp/commit/261398d4b4644a25d25e37e8433801afaed6eb61))
+
 ## 0.2.0
 
 - 新增品牌色阶 `endpoints: 'curve' | 'black-white'`，默认保留曲线端点，支持纯黑白端点及主题 API 透传；
