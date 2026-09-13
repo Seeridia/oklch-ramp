@@ -6,7 +6,7 @@ npm 包名为 `oklch-ramp`。自动发布由 `.github/workflows/publish.yml` 执
 
 - `ci.yml`：PR 和 `main` 推送运行检查、测试、演示站构建和 library 打包。
 - `publish.yml`：发布 GitHub Release 时，检出该 Release 的标签，校验版本，运行上述检查，打包并发布 npm。
-- 在 Actions 页面手动运行 `Publish to npm` 只做预检，不会发布。
+- 在 Actions 页面手动运行 `Publish to npm` 只做构建与包内容预检，不会发布，也不验证 npm 授权或版本是否已被占用。
 - 正式版发布到 `latest`；包含 `-` 的预发布版本发布到 `next`，且 GitHub Release 必须勾选预发布。
 - 标签必须精确匹配根 `package.json`，例如版本 `0.1.1` 对应 `v0.1.1`。
 

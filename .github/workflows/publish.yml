@@ -64,11 +64,9 @@ jobs:
       - run: vp run demo:build
       - name: Build and pack
         run: vp pm pack --out "${RUNNER_TEMP}/oklch-ramp.tgz"
-      - name: Preview npm publication
+      - name: Inspect packed files (no registry publication)
         working-directory: ${{ runner.temp }}
-        env:
-          DIST_TAG: ${{ steps.release.outputs.tag }}
-        run: npm publish ./oklch-ramp.tgz --dry-run --ignore-scripts --access public --tag "$DIST_TAG" --registry=https://registry.npmjs.org/
+        run: npm pack ./oklch-ramp.tgz --dry-run --ignore-scripts --json
       - name: Publish with npm Trusted Publishing
         if: github.event_name == 'release'
         working-directory: ${{ runner.temp }}
