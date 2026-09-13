@@ -21,7 +21,7 @@ Perceptual color ramps and themes powered by OKLCH。OKRamp 是一个基于 Type
 pnpm add okramp
 ```
 
-核心包已更名为 `okramp`；新名称尚待首次 npm 发布。
+核心包已发布：[okramp](https://www.npmjs.com/package/okramp)，安装使用 `npm install okramp`。
 
 ## 快速开始
 
