@@ -25,9 +25,12 @@ export const TOKEN_MAP = [
 ] as const;
 export function semanticValue(theme: SemanticTheme, path: string): string {
   const [group, name] = path.split('.');
-  return (theme.color[group as keyof typeof theme.color] as unknown as Record<string, string>)[
-    name
-  ];
+  const values = theme.color[group as keyof typeof theme.color] as unknown as
+    | Record<string, string>
+    | undefined;
+  const value = name ? values?.[name] : undefined;
+  if (value === undefined) throw new Error(`Unknown semantic color: ${path}`);
+  return value;
 }
 export function toTDesignTheme(
   theme: SemanticTheme,

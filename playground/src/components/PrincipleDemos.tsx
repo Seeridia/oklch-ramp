@@ -92,7 +92,9 @@ export function StrategyDemo() {
           <Select
             aria-label={t('原理演示输入颜色', 'Experiment seed color')}
             value={seed}
-            onChange={(v) => setSeed(String(v))}
+            onChange={(v) => {
+              if (typeof v === 'string') setSeed(v);
+            }}
             options={[
               { value: '#0052D9', label: t('品牌蓝', 'Brand blue') },
               { value: '#dce9ff', label: t('极浅蓝', 'Pale blue') },
