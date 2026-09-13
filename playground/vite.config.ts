@@ -1,8 +1,11 @@
+import mdx from '@mdx-js/rollup';
+import rehypeSlug from 'rehype-slug';
+import remarkGfm from 'remark-gfm';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [{ ...mdx({ rehypePlugins: [rehypeSlug], remarkPlugins: [remarkGfm] }), enforce: 'pre' }, react()],
   resolve: {
     alias: {
       '@okramp/tdesign': decodeURIComponent(

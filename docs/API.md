@@ -1,6 +1,8 @@
-# API
+# 核心 API
 
-相邻色阶诊断 `LOW_ADJACENT_DIFFERENCE` 使用 OKLab 欧氏色差，当前提示阈值为 0.025（经验值，并非 WCAG 标准）。品牌色阶为 `warning`，中性色阶为 `info`，因为细微差异可用于背景层次；颜色重复的 `DUPLICATE_STOPS` 仍为 `warning`。这些提示不代表生成失败。`details` 包含 `scale`（brand/neutral）、`metric`、`threshold` 和 `pairs`；每对含从 0 开始的 `from`、`to` 索引及实际 `distance`。
+`@okramp/core` 的参数、返回结构和错误处理参考。所有示例均使用 ESM 导入。
+
+[项目首页](../README.md) · [算法说明](./ALGORITHMS.md)
 
 ## `generateColorScale(seed, options?)`
 
@@ -20,7 +22,7 @@ interface ColorScaleOptions {
 }
 ```
 
-- `steps`：默认 10，允许 3～20；v1 的标准视觉预设是 10 阶。
+- `steps`：默认 10，允许 3～20；标准视觉预设是 10 阶。
 - `strategy`：默认 `tonal`。
 - `endpoints`：默认 `curve`，保留预设或自定义曲线的端点行为；`black-white` 将整条明度曲线归一化到 1→0，首尾色度强制为 0。适用于三种策略，仅影响品牌色阶。固定锚点必须位于中间阶位，否则抛出 `INVALID_OPTIONS`。自定义曲线也遵循此归一化规则，内部色度倍率保持不变。
 - `anchorIndex`：仅能用于 `fixed-anchor`，从 0 开始，默认 5。
@@ -46,7 +48,7 @@ interface ColorScaleResult {
 }
 ```
 
-`anchorIndex` 只表示“输入原值所在的位置”，因此 tonal 返回 `null`。`recommendedIndex` 在所有策略下都可用，表示建议作为常规品牌主色的阶位。
+`anchorIndex` 只表示“输入原值所在的位置”，因此 tonal 返回 `null`。`recommendedIndex` 在所有策略下都可用，表示与规范化输入色感知距离最近的阶位；是否用于具体品牌角色由主题映射决定。
 
 ## `generateNeutralScale(seed, options?)`
 
@@ -132,6 +134,10 @@ try {
 
 ## 输入说明
 
-输入由 Culori 解析，支持其可识别的 CSS 颜色字符串。首版输出是实体不透明色；输入 alpha 会被忽略，并产生 `ALPHA_IGNORED` 警告。
+输入由 Culori 解析，支持其可识别的 CSS 颜色字符串。生成结果是不透明色；输入 alpha 会被忽略，并产生 `ALPHA_IGNORED` 警告。
 
 输入若来自比 sRGB 更大的颜色空间，会先映射到 sRGB，因此 fixed/adaptive 保留的是 `seed.normalized` 所代表的 sRGB 颜色。
+
+## 相邻色阶诊断
+
+相邻色阶诊断 `LOW_ADJACENT_DIFFERENCE` 使用 OKLab 欧氏色差，当前提示阈值为 0.025（经验值，并非 WCAG 标准）。品牌色阶为 `warning`，中性色阶为 `info`，因为细微差异可用于背景层次；颜色重复的 `DUPLICATE_STOPS` 仍为 `warning`。这些提示不代表生成失败。`details` 包含 `scale`（brand/neutral）、`metric`、`threshold` 和 `pairs`；每对含从 0 开始的 `from`、`to` 索引及实际 `distance`。

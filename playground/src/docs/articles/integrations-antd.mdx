@@ -1,0 +1,79 @@
+import { DocParagraph } from '../Blocks';
+import { Text } from '../Blocks';
+
+## <Text zh="安装" en="Install" />
+
+<DocParagraph><Text zh="适用于 Ant Design 5/6，适配器不依赖 React，可以在应用入口生成主题配置。" en="For Ant Design 5/6. The adapter is React-independent and can generate configuration at the application entry." /></DocParagraph>
+
+```bash
+npm install @okramp/core @okramp/antd antd
+```
+
+## <Text zh="接入应用" en="Integrate your app" />
+
+<DocParagraph><Text zh="将完整配置传入 ConfigProvider。返回的 algorithm: false 保留 OKRamp 显式颜色映射。" en="Pass the complete configuration to ConfigProvider. The returned algorithm: false preserves explicit OKRamp color mappings." /></DocParagraph>
+
+```tsx
+import { generateColorTheme } from '@okramp/core';
+import { createAntdTheme } from '@okramp/antd';
+import { ConfigProvider, Button } from 'antd';
+
+const colors = generateColorTheme('#0052D9', {
+  mode: 'both', contrastPolicy: 'adjust',
+});
+const config = createAntdTheme(colors, 'light');
+
+export default function App() {
+  return <ConfigProvider theme={config}>
+    <Button type="primary">OKRamp</Button>
+  </ConfigProvider>;
+}
+```
+
+## <Text zh="切换模式" en="Switch modes" />
+
+<DocParagraph><Text zh="提前生成 both，再选择 light 或 dark。不叠加 darkAlgorithm，以免再次计算覆盖已生成的颜色。" en="Generate both modes first, then select light or dark. Do not add darkAlgorithm, which would recalculate generated colors." /></DocParagraph>
+
+```ts
+const config = createAntdTheme(colors, isDark ? 'dark' : 'light');
+// <ConfigProvider theme={config}>...</ConfigProvider>
+```
+
+## <Text zh="添加产品配置" en="Add product settings" />
+
+<DocParagraph><Text zh="在 token 上扩展圆角、字体或状态色，在 components 上做单个组件覆盖。覆盖品牌、文字或背景后应重新评估相应的对比度。" en="Extend token for radii, typography or status colors, and components for component overrides. Reassess contrast when overriding brand, text or surfaces." /></DocParagraph>
+
+```ts
+const base = createAntdTheme(colors, 'light');
+const config = {
+  ...base,
+  token: { ...base.token, borderRadius: 6 },
+  components: { Button: { controlHeight: 36 } },
+};
+```
+
+## <Text zh="浮层与静态方法" en="Portals and static methods" />
+
+<DocParagraph><Text zh="静态 message、Modal 等方法可能不消费当前 ConfigProvider 上下文；在 Ant Design 中使用 App 提供的上下文方法，并确保浮层处于正确的主题环境。" en="Static message and Modal methods may not consume ConfigProvider context. Use context methods provided by Ant Design App and keep overlays in the intended theme context." /></DocParagraph>
+
+## <Text zh="createAntdTheme" en="createAntdTheme" />
+
+<DocParagraph><Text zh="createAntdTheme(result, mode = light) 返回 algorithm: false 和 token。请求未生成的模式会抛出错误。" en="createAntdTheme(result, mode = light) returns algorithm: false and token. Requesting a mode that was not generated throws an error." /></DocParagraph>
+
+```ts
+const light = createAntdTheme(colors);
+const dark = createAntdTheme(colors, 'dark');
+```
+
+## <Text zh="createAntdTokens" en="createAntdTokens" />
+
+<DocParagraph><Text zh="createAntdTokens(theme) 接收一个 SemanticTheme，返回颜色别名对象。直接使用时仍应配置 algorithm: false。" en="createAntdTokens(theme) accepts a SemanticTheme and returns color aliases. Configure algorithm: false when using it directly." /></DocParagraph>
+
+```ts
+import { createAntdTokens } from '@okramp/antd';
+const token = createAntdTokens(colors.themes.light!);
+```
+
+## <Text zh="映射边界" en="Mapping boundary" />
+
+<DocParagraph><Text zh="涵盖 primary、info、文字、链接、背景、边框、填充及选中状态。成功、警告、错误和非颜色配置沿用组件库默认值。组件自身特殊样式可通过 components 扩展。" en="Covers primary, info, text, links, surfaces, borders, fills and selection. Success, warning, error and non-color settings retain library defaults. Extend components for component-specific styling." /></DocParagraph>
