@@ -1,8 +1,10 @@
+import { createAntdTheme } from '@okramp/antd';
+import { createShadcnTokens, createShadcnCss } from '@okramp/shadcn';
 import type { Generated, DisplayFormat } from './model';
 import { displayColor } from './model';
 import { toTDesignTheme } from './adapters/tdesign';
 export type ExportFormat = 'css' | 'json' | 'typescript';
-export type ExportTarget = 'generic' | 'tdesign';
+export type ExportTarget = 'generic' | 'tdesign' | 'antd' | 'shadcn';
 export type ExportMode = 'light' | 'dark' | 'both';
 export interface ExportOptions {
   format: ExportFormat;
@@ -14,6 +16,29 @@ export interface ExportOptions {
 export function createExport(result: Generated, options: ExportOptions) {
   const fmt = (value: string) => displayColor(value, options.colorFormat);
   const selectedModes = options.mode === 'both' ? (['light', 'dark'] as const) : [options.mode];
+  if (options.target === 'antd' || options.target === 'shadcn') {
+    if (!result.theme) return '';
+    const theme = {
+      ...result.theme,
+      themes: Object.fromEntries(
+        selectedModes.flatMap((mode) => {
+          const value = result.theme?.themes[mode];
+          return value ? [[mode, value]] : [];
+        }),
+      ),
+    };
+    if (options.target === 'shadcn' && options.format === 'css') return createShadcnCss(theme);
+    const configs = Object.fromEntries(
+      selectedModes.map((mode) => [
+        mode,
+        options.target === 'antd'
+          ? createAntdTheme(theme, mode)
+          : createShadcnTokens(theme.themes[mode]!),
+      ]),
+    );
+    const json = JSON.stringify(configs, null, 2);
+    return options.format === 'json' ? json : `export const themes = ${json};\n`;
+  }
   const data: Record<string, Record<string, string>> = {};
   if (options.sections.includes('brand'))
     data.brand = Object.fromEntries(

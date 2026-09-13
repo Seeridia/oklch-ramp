@@ -14,6 +14,12 @@ export default defineConfig({
   test: {
     alias: {
       '@okramp/tdesign': fileURLToPath(new URL('./packages/tdesign/src/index.ts', import.meta.url)),
+      '@okramp/antd': decodeURIComponent(
+        new URL('./packages/antd/src/index.ts', import.meta.url).pathname,
+      ),
+      '@okramp/shadcn': decodeURIComponent(
+        new URL('./packages/shadcn/src/index.ts', import.meta.url).pathname,
+      ),
       '@okramp/core': fileURLToPath(new URL('./src/index.ts', import.meta.url)),
     },
     include: ['tests/**/*.test.ts'],

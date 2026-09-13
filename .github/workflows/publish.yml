@@ -89,6 +89,8 @@ jobs:
       # Workspace types resolve through dist/index.d.mts on a fresh checkout.
       - run: vp pack
       - run: vp -C packages/tdesign pack
+      - run: vp -C packages/shadcn pack
+      - run: vp -C packages/antd pack
       - run: vp check
       - run: vp test
       - run: vp run demo:build

@@ -230,6 +230,18 @@ importers:
         specifier: 0.3.0
         version: 0.3.0(@types/node@24.13.4)(@vitest/coverage-v8@4.1.11)(typescript@6.0.3)(vite@8.2.2(@types/node@24.13.4))
 
+  packages/antd:
+    dependencies:
+      '@okramp/core':
+        specifier: workspace:*
+        version: link:../..
+
+  packages/shadcn:
+    dependencies:
+      '@okramp/core':
+        specifier: workspace:*
+        version: link:../..
+
   packages/tdesign:
     dependencies:
       '@okramp/core':
@@ -241,9 +253,15 @@ importers:
       '@ant-design/colors':
         specifier: 8.0.1
         version: 8.0.1
+      '@okramp/antd':
+        specifier: workspace:*
+        version: link:../packages/antd
       '@okramp/core':
         specifier: workspace:*
         version: link:..
+      '@okramp/shadcn':
+        specifier: workspace:*
+        version: link:../packages/shadcn
       '@okramp/tdesign':
         specifier: workspace:*
         version: link:../packages/tdesign

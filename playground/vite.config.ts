@@ -8,6 +8,12 @@ export default defineConfig({
       '@okramp/tdesign': decodeURIComponent(
         new URL('../packages/tdesign/src/index.ts', import.meta.url).pathname,
       ),
+      '@okramp/antd': decodeURIComponent(
+        new URL('../packages/antd/src/index.ts', import.meta.url).pathname,
+      ),
+      '@okramp/shadcn': decodeURIComponent(
+        new URL('../packages/shadcn/src/index.ts', import.meta.url).pathname,
+      ),
       '@okramp/core': decodeURIComponent(new URL('../src/index.ts', import.meta.url).pathname),
     },
   },

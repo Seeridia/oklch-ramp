@@ -12,7 +12,15 @@ import { StrategyDemo, GamutDemo, NeutralDemo } from './PrincipleDemos';
 hljs.registerLanguage('typescript', typescript);
 hljs.registerLanguage('bash', bash);
 
-type GuideId = 'start' | 'scales' | 'principles' | 'themes' | 'tdesign' | 'api' | 'diagnostics';
+type GuideId =
+  | 'start'
+  | 'scales'
+  | 'principles'
+  | 'themes'
+  | 'adapters'
+  | 'tdesign'
+  | 'api'
+  | 'diagnostics';
 type Translate = ReturnType<typeof useI18n>['t'];
 
 interface GuideDocument {
@@ -834,6 +842,19 @@ export function Guide() {
         ],
       },
       {
+        id: 'adapters' as const,
+        label: 'Ant Design / shadcn',
+        title: t('Ant Design 与 shadcn/ui 接入', 'Ant Design and shadcn/ui integration'),
+        description: t(
+          '消费原生配置与语义 CSS 变量。',
+          'Use native configuration and semantic CSS variables.',
+        ),
+        sections: [
+          ['adapter-antd', 'Ant Design'],
+          ['adapter-shadcn', 'shadcn/ui'],
+        ],
+      },
+      {
         id: 'api' as const,
         label: t('API 参考', 'API reference'),
         title: t('API 与 TypeScript 参考', 'API and TypeScript reference'),
@@ -879,6 +900,40 @@ export function Guide() {
     principles: <PrinciplesDocument t={t} />,
     themes: <ThemesDocument t={t} />,
     tdesign: <TDesignDocument t={t} />,
+    adapters: (
+      <>
+        <Section id="adapter-antd" title="Ant Design">
+          <Code language="bash">npm install @okramp/core @okramp/antd antd</Code>
+          <Code>{`import { generateColorTheme } from '@okramp/core';
+import { createAntdTheme } from '@okramp/antd';
+import { ConfigProvider } from 'antd';
+const colors = generateColorTheme('#0052D9', { mode: 'both', contrastPolicy: 'adjust' });
+const config = createAntdTheme(colors, 'dark');
+// <ConfigProvider theme={config}><App /></ConfigProvider>`}</Code>
+          <p>
+            {t(
+              '适用于 Ant Design 5/6。返回 algorithm: false 和显式颜色 Token；状态色及非颜色配置沿用组件库默认值。切换明暗时重新选择 mode，不再叠加 darkAlgorithm。',
+              'For Ant Design 5/6. Returns algorithm: false and explicit color tokens. Status and non-color tokens retain library defaults. Select the mode when switching themes; do not add darkAlgorithm.',
+            )}
+          </p>
+        </Section>
+        <Section id="adapter-shadcn" title="shadcn/ui">
+          <Code language="bash">npm install @okramp/core @okramp/shadcn</Code>
+          <Code>{`import { generateColorTheme } from '@okramp/core';
+import { createShadcnCss } from '@okramp/shadcn';
+const colors = generateColorTheme('#0052D9', { mode: 'both' });
+const css = createShadcnCss(colors);
+// Save CSS after your existing shadcn theme declarations.
+// document.documentElement.classList.toggle('dark', true);`}</Code>
+          <p>
+            {t(
+              '导出 :root 与 .dark，覆盖背景、文字、primary、secondary、accent、边框和 sidebar。保留 destructive、chart、radius 与 Tailwind @theme 配置。变量是完整 CSS 颜色值，旧版 hsl(var(--primary)) 需改成直接引用 var(--primary)。',
+              'Exports :root and .dark for surfaces, text, primary, secondary, accent, borders and sidebar. Preserve destructive, chart, radius and Tailwind @theme declarations. Values are full CSS colors; legacy hsl(var(--primary)) must use var(--primary) directly.',
+            )}
+          </p>
+        </Section>
+      </>
+    ),
     api: <ApiDocument t={t} />,
     diagnostics: <DiagnosticsDocument t={t} />,
   }[documentId];

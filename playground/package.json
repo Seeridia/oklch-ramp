@@ -12,7 +12,9 @@
   },
   "dependencies": {
     "@ant-design/colors": "8.0.1",
+    "@okramp/antd": "workspace:*",
     "@okramp/core": "workspace:*",
+    "@okramp/shadcn": "workspace:*",
     "@okramp/tdesign": "workspace:*",
     "culori": "4.0.2",
     "highlight.js": "11.11.1",

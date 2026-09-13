@@ -219,3 +219,11 @@ vp build
 ## License
 
 MIT
+
+## 组件库适配
+
+- `@okramp/tdesign`：TDesign Token 与引用式 CSS。
+- `@okramp/antd`：Ant Design 5/6 ConfigProvider 配置，提供 `createAntdTheme` 和 `createAntdTokens`。
+- `@okramp/shadcn`：现代 shadcn/ui 语义变量，提供 `createShadcnTokens` 和 `createShadcnCss`。
+
+安装适配包：`npm install @okramp/core @okramp/antd @okramp/shadcn`。演示站通过 workspace 使用这些包。

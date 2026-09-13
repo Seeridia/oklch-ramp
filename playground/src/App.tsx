@@ -192,7 +192,7 @@ export function App() {
   const exportDisabled =
     Boolean(attempt.error) ||
     sections.length === 0 ||
-    (exportTarget === 'tdesign' && !result.theme) ||
+    (exportTarget !== 'generic' && !result.theme) ||
     (sections.length === 1 && sections[0] === 'semantic' && !result.theme);
   const exportValue = createExport(result, {
     format: exportFormat,
@@ -631,9 +631,14 @@ export function App() {
                 theme="button"
                 variant="default-filled"
                 value={exportTarget}
-                onChange={(v) => setExportTarget(v as ExportTarget)}
+                onChange={(v) => {
+                  setExportTarget(v as ExportTarget);
+                  if (v === 'antd' && exportFormat === 'css') setExportFormat('typescript');
+                }}
                 options={[
                   { label: t('TDesign 主题', 'TDesign theme'), value: 'tdesign' },
+                  { label: 'Ant Design', value: 'antd' },
+                  { label: 'shadcn/ui', value: 'shadcn' },
                   { label: t('通用颜色', 'Generic colors'), value: 'generic' },
                 ]}
               />
@@ -655,6 +660,7 @@ export function App() {
                 <Select
                   aria-label={t('颜色格式', 'Color format')}
                   value={format}
+                  disabled={exportTarget === 'antd' || exportTarget === 'shadcn'}
                   onChange={(v) => setFormat(v as DisplayFormat)}
                   options={['hex', 'rgb', 'oklch'].map((v) => ({
                     value: v,
@@ -666,6 +672,7 @@ export function App() {
             <Field label={t('内容范围', 'Content')}>
               <Checkbox.Group
                 aria-label={t('内容范围', 'Content')}
+                disabled={exportTarget === 'antd' || exportTarget === 'shadcn'}
                 value={sections}
                 onChange={(values) => setSections(values.map(String))}
                 options={[
@@ -695,7 +702,7 @@ export function App() {
                 value={exportFormat}
                 onChange={(v) => setExportFormat(v as ExportFormat)}
                 options={[
-                  { label: 'CSS', value: 'css' },
+                  { label: 'CSS', value: 'css', disabled: exportTarget === 'antd' },
                   { label: 'JSON', value: 'json' },
                   { label: 'TypeScript', value: 'typescript' },
                 ]}
@@ -706,8 +713,8 @@ export function App() {
             <Alert
               theme="warning"
               message={t(
-                '当前仅生成原始色阶。TDesign 主题需要至少 10 阶品牌色。',
-                'Only raw scales are available. A TDesign theme requires at least 10 brand stops.',
+                '当前仅生成原始色阶。组件库主题需要至少 10 阶品牌色。',
+                'Only raw scales are available. A component-library theme requires at least 10 brand stops.',
               )}
             />
           )}
@@ -725,15 +732,25 @@ export function App() {
           <Alert
             theme="info"
             message={
-              exportTarget === 'tdesign'
+              exportTarget === 'antd'
                 ? t(
-                    'CSS 请在 TDesign 样式之后加载。深色模式设置根元素 theme-mode="dark"；成功、警告与错误色使用官方默认值。',
-                    'Load the CSS after TDesign styles. Set theme-mode="dark" on the root element for dark mode. Status colors retain TDesign defaults.',
+                    '将 themes.light 或 themes.dark 传入 ConfigProvider 的 theme。导出包含完整映射。',
+                    'Pass themes.light or themes.dark to ConfigProvider theme. Exports include the full mapping.',
                   )
-                : t(
-                    '通用 Token 不依赖组件库，可用于自己的设计系统。',
-                    'Generic tokens are framework-independent and can be used in your own design system.',
-                  )
+                : exportTarget === 'shadcn'
+                  ? t(
+                      'CSS 在现有主题之后加载，以 .dark 切换深色。保留原有 destructive、chart 与 radius 配置。',
+                      'Load CSS after existing theme variables and toggle .dark. Keep existing destructive, chart and radius settings.',
+                    )
+                  : exportTarget === 'tdesign'
+                    ? t(
+                        'CSS 请在 TDesign 样式之后加载。深色模式设置根元素 theme-mode="dark"；成功、警告与错误色使用官方默认值。',
+                        'Load the CSS after TDesign styles. Set theme-mode="dark" on the root element for dark mode. Status colors retain TDesign defaults.',
+                      )
+                    : t(
+                        '通用 Token 不依赖组件库，可用于自己的设计系统。',
+                        'Generic tokens are framework-independent and can be used in your own design system.',
+                      )
             }
           />
         </Drawer>
