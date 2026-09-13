@@ -1,0 +1,56 @@
+name: Deploy OKRamp site
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-okramp-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.repository == 'Seeridia/oklch-ramp' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: voidzero-dev/setup-vp@v1
+        with:
+          version: 0.3.0
+          node-version: 24
+          cache: true
+          run-install: false
+      - run: vp install --frozen-lockfile
+      - run: vp pack
+      - run: vp check
+      - run: vp test
+      - run: vp run demo:build
+      - name: Configure deployment SSH
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          test -n "$DEPLOY_SSH_KEY"
+          test -n "$DEPLOY_KNOWN_HOSTS"
+          umask 077
+          mkdir -p "$RUNNER_TEMP/okramp-ssh"
+          printf '%s\n' "$DEPLOY_SSH_KEY" > "$RUNNER_TEMP/okramp-ssh/key"
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > "$RUNNER_TEMP/okramp-ssh/known_hosts"
+      - name: Upload site assets, then switch entry page
+        env:
+          DEPLOY_TARGET: deploy@121.41.122.164
+          DEPLOY_PATH: /opt/1panel/www/sites/okramp.seeridia.top/index
+        run: |
+          export RSYNC_RSH="ssh -i $RUNNER_TEMP/okramp-ssh/key -o IdentitiesOnly=yes -o IdentityAgent=none -o BatchMode=yes -o ConnectTimeout=15 -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$RUNNER_TEMP/okramp-ssh/known_hosts"
+          test -s playground/dist/index.html
+          # Preserve server-managed files and assets referenced by existing clients.
+          rsync -rz --delay-updates --chmod=D755,F644 --exclude=index.html --exclude=.well-known/ playground/dist/ "$DEPLOY_TARGET:$DEPLOY_PATH/"
+          rsync -rz --delay-updates --chmod=F644 playground/dist/index.html "$DEPLOY_TARGET:$DEPLOY_PATH/"
+      - name: Remove SSH credentials
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/okramp-ssh"

@@ -17,6 +17,12 @@ vp test
 
 本地地址默认是 `http://127.0.0.1:4173/`。
 
+## 自动部署
+
+推送到 `main` 后，GitHub Actions 的 `Deploy OKRamp site` 会使用 Vite+ 构建、检查和测试，将 `playground/dist/` 同步至 `deploy@121.41.122.164:/opt/1panel/www/sites/okramp.seeridia.top/index/`。也可在 Actions 手动运行。
+
+SSH 凭据使用仓库 Secrets `DEPLOY_SSH_KEY` 和 `DEPLOY_KNOWN_HOSTS`，不写入源码。部署先上传静态资源，再替换 `index.html`；保留历史资源和服务器管理文件。线上地址为 <https://okramp.seeridia.top>。
+
 ## 页面
 
 - 工作台：实时参数、品牌/中性色阶、HEX/RGB/OKLCH、色彩详情。
