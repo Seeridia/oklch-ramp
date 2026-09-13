@@ -49,6 +49,8 @@ export interface Diagnostics {
 }
 
 export interface ColorScaleOptions {
+  /** Curve endpoints by default; black-white stretches lightness to 1–0 with achromatic ends. */
+  endpoints?: 'curve' | 'black-white';
   /** Number of stops. The stable v1 preset is 10; 3–20 are accepted. */
   steps?: number;
   /** Defaults to tonal. */

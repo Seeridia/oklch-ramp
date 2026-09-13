@@ -49,6 +49,15 @@ describe('TDesign application adapter', () => {
     expect(light['--td-brand-color']).not.toBe(dark['--td-brand-color']);
     expect(Object.keys(light).some((key) => /success|warning|error/.test(key))).toBe(false);
   });
+  it('keeps dark surfaces and borders in the same visual order as TDesign gray roles', () => {
+    const theme = generateColorTheme('#0052D9', { mode: 'both', contrastPolicy: 'adjust' });
+    const tokens = toTDesignTheme(theme.themes.dark!, theme.scales.neutral);
+    expect(tokens['--td-bg-color-page']).toBe(theme.scales.neutral.stops[12]!.color);
+    expect(tokens['--td-bg-color-container']).toBe(theme.scales.neutral.stops[11]!.color);
+    expect(
+      contrastRatio(tokens['--td-component-border']!, tokens['--td-bg-color-container']!),
+    ).toBeLessThan(2.5);
+  });
   it('exports exactly the semantic variables consumed by the live preview', () => {
     const result = generate(DEFAULTS);
     const json = JSON.parse(

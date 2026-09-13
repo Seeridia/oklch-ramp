@@ -1,14 +1,26 @@
-import { useState } from 'react';
-import { formatHex } from 'culori';
-import { Alert, Button, Card, Input, Select, Space, Table, Tag } from 'tdesign-react';
-import { SearchIcon, ArrowRightIcon } from 'tdesign-icons-react';
-import { generateColorScale, type ColorThemeResult, type ScaleStrategy } from 'oklch-ramp';
+import { useEffect, useState } from 'react';
+import { converter, formatHex, interpolate } from 'culori';
+import { generate as generateAntColors } from '@ant-design/colors';
+import { Color as TDesignColor } from 'tvision-color';
+import { Alert, Card, Select, Table, Tag, Tooltip } from 'tdesign-react';
+import { SearchIcon } from 'tdesign-icons-react';
+import { chooseContrastingForeground, type ColorThemeResult } from 'oklch-ramp';
 import { TOKEN_MAP, toTDesignTheme } from '../adapters/tdesign';
-import { STRATEGIES, scaleOptions, type Generated, type Settings } from '../model';
-import { CopyButton, ScaleStrip } from './Scales';
+import { STRATEGIES, type Generated, type Settings } from '../model';
+import { CopyButton, copyText } from './Scales';
+import { AccessibleInput, Field, SeedColorControl } from './Controls';
+import { readUrlParam, updateUrlParams } from '../url-state';
 export function Tokens({ theme }: { theme: ColorThemeResult }) {
-  const [query, setQuery] = useState('');
-  const [group, setGroup] = useState('all');
+  const [query, setQuery] = useState(() => readUrlParam('tokenQuery', ''));
+  const [group, setGroup] = useState(() => readUrlParam('tokenGroup', 'all'));
+  useEffect(() => {
+    const syncFromUrl = () => {
+      setQuery(readUrlParam('tokenQuery', ''));
+      setGroup(readUrlParam('tokenGroup', 'all'));
+    };
+    window.addEventListener('popstate', syncFromUrl);
+    return () => window.removeEventListener('popstate', syncFromUrl);
+  }, []);
   const values = {
     light: toTDesignTheme(theme.themes.light!, theme.scales.neutral),
     dark: toTDesignTheme(theme.themes.dark!, theme.scales.neutral),
@@ -59,18 +71,28 @@ export function Tokens({ theme }: { theme: ColorThemeResult }) {
         </Tag>
       </div>
       <div className="table-toolbar">
-        <Input
+        <AccessibleInput
           aria-label="搜索 Token"
-          prefixIcon={<SearchIcon />}
-          placeholder="搜索变量、用途或语义名称"
+          name="token-search"
+          prefixIcon={<SearchIcon aria-hidden="true" />}
+          placeholder="例如：--td-brand-color…"
           value={query}
-          onChange={setQuery}
+          onChange={(value) => {
+            setQuery(value);
+            updateUrlParams({ tokenQuery: value || null }, 'replace');
+          }}
+          autocomplete="off"
+          spellCheck={false}
           clearable
         />
         <Select
           aria-label="Token 分组"
           value={group}
-          onChange={(v) => setGroup(typeof v === 'string' ? v : 'all')}
+          onChange={(v) => {
+            const value = typeof v === 'string' ? v : 'all';
+            setGroup(value);
+            updateUrlParams({ tokenGroup: value === 'all' ? null : value }, 'replace');
+          }}
           options={[
             { label: '全部分组', value: 'all' },
             { label: '品牌', value: 'brand' },
@@ -139,7 +161,7 @@ export function Diagnostics({ result }: { result: Generated }) {
     ...(result.theme?.diagnostics.messages ?? []),
   ].filter(
     (item, index, all) =>
-      all.findIndex((other) => other.code === item.code && other.message === item.message) ===
+      all.findIndex((other) => JSON.stringify(other) === JSON.stringify(item)) ===
       index,
   );
   const checks = result.theme?.diagnostics.contrastChecks ?? [];
@@ -211,11 +233,25 @@ export function Diagnostics({ result }: { result: Generated }) {
                       ? 'warning'
                       : 'info'
                 }
-                title={message.code}
+                title={message.code === 'LOW_ADJACENT_DIFFERENCE' ? '相邻色阶差异较小' : message.code}
                 message={
                   <div>
-                    {message.message}
-                    {message.details && (
+                    {message.code === 'LOW_ADJACENT_DIFFERENCE' ? (
+                      <>
+                        <p>{message.details?.scale === 'neutral'
+                          ? '中性色的细微差异可用于背景层次，此提示不代表生成失败。'
+                          : '品牌色阶部分颜色较接近，可尝试减少阶数或调整锚点。'}</p>
+                        {Array.isArray(message.details?.pairs) && message.details.pairs.map(
+                          (pair: { from: number; to: number; distance: number }) => (
+                            <p key={`${pair.from}-${pair.to}`}>
+                              {message.details?.scale === 'neutral' ? '中性色' : '品牌色'}第 {pair.from + 1}–{pair.to + 1} 阶：
+                              OKLab 色差 {pair.distance.toFixed(4)}（提示阈值 {String(message.details?.threshold)}）
+                            </p>
+                          ),
+                        )}
+                      </>
+                    ) : message.message}
+                    {message.details && message.code !== 'LOW_ADJACENT_DIFFERENCE' && (
                       <pre className="diagnostic-details">
                         {JSON.stringify(message.details, null, 2)}
                       </pre>
@@ -232,138 +268,219 @@ export function Diagnostics({ result }: { result: Generated }) {
     </div>
   );
 }
-export function Comparison({
-  result,
-  onApply,
-}: {
-  result: Generated;
-  onApply: (strategy: ScaleStrategy) => void;
+function interpolatedScale(seed: string, mode: 'hsl' | 'rgb' | 'lab', steps: number) {
+  const anchor = Math.min(6, steps - 2);
+  const light = interpolate(['#ffffff', seed], mode);
+  const dark = interpolate([seed, '#000000'], mode);
+  return Array.from({ length: steps }, (_, index) => {
+    const color =
+      index <= anchor
+        ? light(anchor === 0 ? 1 : index / anchor)
+        : dark((index - anchor) / Math.max(1, steps - 1 - anchor));
+    return formatHex(color) ?? seed;
+  });
+}
+
+function ComparisonRamp({ colors, anchor, recommended, columns, seed }: {
+  colors: string[]; anchor?: number; recommended?: number; columns: number; seed: string;
 }) {
-  const settings: Settings = result.settings;
+  const toOklch = converter('oklch');
+  return (
+    <div className="comparison-ramp" style={{ gridTemplateColumns: `repeat(${columns}, minmax(28px, 1fr))` }}>
+      {colors.map((color, index) => {
+        const isAnchor = index === anchor;
+        const isRecommended = index === recommended;
+        const retained = formatHex(color) === formatHex(seed);
+        const details = `${formatHex(color)} · OKLCH L ${toOklch(color)!.l.toFixed(3)} · ${retained ? '与输入色一致' : '与输入色不同'}${isAnchor ? ' · A 输入色锚点' : ''}${isRecommended ? ' · R 推荐主色' : ''}`;
+        return (
+          <Tooltip key={`${color}-${index}`} content={details} trigger={['hover', 'focus']}>
+            <button
+              type="button"
+              style={{ background: color, color: chooseContrastingForeground(color) }}
+              aria-label={`复制第 ${index + 1} 阶：${details}`}
+              onClick={() => void copyText(color)}
+            >
+              <span>{String(index + 1).padStart(2, '0')}</span>
+              {(isAnchor || isRecommended) && <strong>{isAnchor ? 'A' : 'R'}</strong>}
+            </button>
+          </Tooltip>
+        );
+      })}
+      {Array.from({ length: columns - colors.length }, (_, index) => (
+        <span key={`empty-${index}`} className="comparison-empty" aria-label="无此阶颜色">—</span>
+      ))}
+    </div>
+  );
+}
+
+export function Comparison({ result, settings, onChange, error }: {
+  result: Pick<Generated, 'scale' | 'settings'>;
+  settings: Settings;
+  onChange: (settings: Settings) => void;
+  error: string;
+}) {
+  const steps = result.scale.colors.length;
+  const seed = result.settings.seed;
+  // Official generators accept sRGB input; normalize OKLCH and other CSS formats first.
+  const officialSeed = formatHex(seed)!;
+  const tdesign = TDesignColor.getColorGradations({ colors: [officialSeed], step: steps })[0]!;
+  const antColors = generateAntColors(officialSeed);
+  const columns = Math.max(steps, antColors.length);
+  const methods = [
+    {
+      id: 'okramp',
+      label: 'OKRamp',
+      space: 'OKLCH',
+      description: '以感知明度和色度为核心生成，并对超出 sRGB 的颜色执行色域映射。',
+      colors: result.scale.colors,
+      anchor: result.scale.anchorIndex ?? undefined,
+      recommended: result.scale.recommendedIndex,
+      lightness: '感知均匀曲线',
+      hue: '尽量保持稳定',
+      endpoints: result.settings.endpoints === 'black-white' ? '纯白 / 纯黑' : '曲线端点',
+      primary: true,
+    },
+    {
+      id: 'tdesign',
+      label: 'TDesign',
+      space: 'HCT',
+      description: '使用官方主题生成器依赖的 tvision-color，根据色相分段调整 Tone 曲线与色度。',
+      colors: tdesign.colors,
+      anchor: tdesign.colors.findIndex((color) => formatHex(color) === officialSeed),
+      recommended: tdesign.primary,
+      lightness: 'Tone 贝塞尔曲线',
+      hue: 'HCT 色相控制',
+      endpoints: '按色相设定范围',
+      gamut: 'HCT 求解至 sRGB',
+      source: 'https://www.npmjs.com/package/tvision-color',
+      sourceLabel: 'tvision-color 1.6.0',
+    },
+    {
+      id: 'ant-design',
+      label: 'Ant Design',
+      space: 'HSV',
+      description: '使用官方 @ant-design/colors 浅色色板算法，固定生成 10 阶，输入主色位于第 6 阶。',
+      colors: antColors,
+      anchor: 5,
+      lightness: 'HSV Value 步进',
+      hue: '按方向偏移色相',
+      endpoints: '5 阶浅色 / 4 阶深色',
+      gamut: 'HSV 通道边界约束',
+      source: 'https://github.com/ant-design/ant-design-colors',
+      sourceLabel: '@ant-design/colors 8.0.1',
+    },
+    {
+      id: 'hsl',
+      label: 'HSL 插值',
+      space: 'HSL',
+      description: '分别插值色相、饱和度与亮度，计算直观，但数值亮度不等于视觉亮度。',
+      colors: interpolatedScale(seed, 'hsl', steps),
+      anchor: Math.min(6, steps - 2),
+      lightness: 'HSL Lightness',
+      hue: '固定 H 通道',
+      endpoints: '白色 / 黑色',
+    },
+    {
+      id: 'rgb',
+      label: 'sRGB 插值',
+      space: 'RGB',
+      description: '直接对红、绿、蓝通道插值，实现简单，过渡中容易出现明度不均。',
+      colors: interpolatedScale(seed, 'rgb', steps),
+      anchor: Math.min(6, steps - 2),
+      lightness: '通道线性变化',
+      hue: '可能发生偏移',
+      endpoints: '白色 / 黑色',
+    },
+    {
+      id: 'lab',
+      label: 'CIELAB 插值',
+      space: 'Lab',
+      description: '在笛卡尔感知空间中插值，亮度较平滑，但色相和色度控制不够直接。',
+      colors: interpolatedScale(seed, 'lab', steps),
+      anchor: Math.min(6, steps - 2),
+      lightness: '感知明度插值',
+      hue: '可能沿直线漂移',
+      endpoints: '白色 / 黑色',
+    },
+  ];
   return (
     <div className="stack">
       <Alert
         theme="info"
-        message="三种策略使用相同主色和公共参数。点击色块可复制颜色，选择适合的策略后应用到工作台。"
+        message="各方案使用同一输入主色，固定生成 10 阶。策略与锚点仅影响 OKRamp；按阶号对齐不代表相同感知明度。A 表示输入色锚点，R 表示推荐主色；重合时显示 A。悬停或聚焦查看颜色明度，点击复制。"
       />
+      <Card bordered={false} className="comparison-controls">
+        <SeedColorControl settings={settings} onChange={onChange} error={error} inputId="comparison-seed" inline />
+      </Card>
       <div className="comparison-grid">
-        {STRATEGIES.map((strategy) => {
-          const scale = generateColorScale(settings.seed, {
-            ...scaleOptions({ ...settings, strategy: strategy.value }),
-            strategy: strategy.value,
-          });
-          return (
-            <Card key={strategy.value} bordered={false}>
-              <div className="comparison-title">
-                <span className="eyebrow">{strategy.value.toUpperCase()}</span>
-                <h3>{strategy.label}</h3>
-                <p>{strategy.description}</p>
+        {methods.map((method) => (
+          <Card key={method.id} bordered={false} className="comparison-card">
+            <div className="comparison-title">
+              <div>
+                <h3>{method.label}</h3>
+                <Tag size="small" theme={method.primary ? 'primary' : 'default'} variant="light">
+                  {method.space}
+                </Tag>
               </div>
-              <ScaleStrip result={scale} compact />
-              <div className="comparison-facts">
-                <div>
-                  <span>输入色保留</span>
-                  <strong>{scale.anchorIndex === null ? '不保证' : '已保留'}</strong>
-                </div>
-                <div>
-                  <span>锚点位置</span>
-                  <strong>
-                    {scale.anchorIndex === null ? '自动重建' : `第 ${scale.anchorIndex + 1} 阶`}
-                  </strong>
-                </div>
-                <div>
-                  <span>生成诊断</span>
-                  <strong>{scale.diagnostics.messages.length} 项</strong>
-                </div>
+              <p>{method.description}</p>
+              {method.primary && (
+                <section className="comparison-strategy" aria-label="OKRamp 配置">
+                  <Field label="生成策略">
+                    <Select
+                      aria-label="OKRamp 生成策略"
+                      value={settings.strategy}
+                      options={STRATEGIES.map(({ value, label }) => ({ value, label }))}
+                      onChange={(value) => onChange({ ...settings, strategy: value as Settings['strategy'] })}
+                    />
+                  </Field>
+                  {settings.strategy === 'fixed-anchor' && (
+                    <Field label="输入色锚点">
+                      <Select
+                        aria-label="OKRamp 输入色锚点"
+                        value={settings.anchorIndex}
+                        options={Array.from({ length: 10 }, (_, index) => ({ value: index, label: `第 ${index + 1} 阶` }))}
+                        onChange={(value) => onChange({ ...settings, anchorIndex: Number(value) })}
+                      />
+                    </Field>
+                  )}
+                </section>
+              )}
+              {method.source && (
+                <a className="comparison-source" href={method.source} target="_blank" rel="noreferrer">
+                  {method.sourceLabel}
+                </a>
+              )}
+            </div>
+            <div className="comparison-content">
+              <ComparisonRamp colors={method.colors} anchor={method.anchor} recommended={method.recommended} columns={columns} seed={seed} />
+              <div className="comparison-scale-labels">
+                <span>浅色端</span>
+                <span>{method.colors.length} 阶 · A 输入色 / R 推荐色</span>
+                <span>深色端</span>
               </div>
-              <div
-                className="compare-button-sample"
-                style={
-                  {
-                    '--td-brand-color': scale.colors[scale.recommendedIndex],
-                  } as React.CSSProperties
-                }
-              >
-                <Button theme="primary" onClick={() => onApply(strategy.value)}>
-                  预览此主色
-                </Button>
-                <Tag variant="light">{scale.colors[scale.recommendedIndex]}</Tag>
+            </div>
+            <div className="comparison-facts">
+              <div>
+                <span>亮度方式</span>
+                <strong>{method.lightness}</strong>
               </div>
-              <Button
-                block
-                theme="primary"
-                variant={settings.strategy === strategy.value ? 'base' : 'outline'}
-                suffix={<ArrowRightIcon />}
-                onClick={() => onApply(strategy.value)}
-              >
-                {settings.strategy === strategy.value ? '当前策略 · 返回工作台' : '应用到工作台'}
-              </Button>
-            </Card>
-          );
-        })}
+              <div>
+                <span>色相表现</span>
+                <strong>{method.hue}</strong>
+              </div>
+              <div>
+                <span>端点方式</span>
+                <strong>{method.endpoints}</strong>
+              </div>
+              <div>
+                <span>色域处理</span>
+                <strong>{method.gamut ?? (method.primary ? '映射至 sRGB' : 'HEX 输出裁剪至 sRGB')}</strong>
+              </div>
+            </div>
+          </Card>
+        ))}
       </div>
     </div>
   );
 }
-export function Guide() {
-  return (
-    <div className="guide-layout">
-      <Card bordered={false}>
-        <span className="eyebrow">GETTING STARTED</span>
-        <h2>从一个主色，到完整主题</h2>
-        <p className="guide-intro">探索颜色、验证组件表现，再把主题带回你的项目。</p>
-        <div className="guide-steps">
-          {[
-            ['输入主色', '输入 HEX、RGB 或 OKLCH 颜色，或使用拾色器和预设。'],
-            ['选择策略', '均匀色阶适合探索；需要保留品牌原色时，选择自动或固定锚点。'],
-            ['验证表现', '在组件预览中体验明暗主题，再检查 Token 与对比度诊断。'],
-            ['导出并接入', '选择 TDesign 目标并导出 CSS，在组件库样式之后加载。'],
-          ].map(([title, text], index) => (
-            <div key={title}>
-              <span>{index + 1}</span>
-              <section>
-                <h3>{title}</h3>
-                <p>{text}</p>
-              </section>
-            </div>
-          ))}
-        </div>
-      </Card>
-      <Card bordered={false} title="TDesign 接入">
-        <p>加载顺序</p>
-        <pre className="code-block">{`import 'tdesign-react/dist/tdesign.css';\nimport './color-theme.css';`}</pre>
-        <p>切换到深色主题</p>
-        <pre className="code-block">{`document.documentElement.setAttribute(\n  'theme-mode', 'dark'\n);`}</pre>
-        <Alert
-          theme="info"
-          message="核心颜色引擎保持框架无关。当前 TDesign 适配器属于演示应用，覆盖品牌、背景、文字与边框语义；状态色沿用官方默认值。"
-        />
-      </Card>
-      <Card bordered={false} title="核心 API">
-        <pre className="code-block">{`generateColorScale('#0052D9', {\n  strategy: 'tonal',\n  steps: 10,\n});\n\ngenerateColorTheme('#0052D9', {\n  mode: 'both',\n  contrastPolicy: 'adjust',\n});`}</pre>
-        <Space>
-          <Button href="https://github.com/Seeridia/oklch-ramp" target="_blank" variant="outline">
-            项目文档
-          </Button>
-          <Button
-            href="https://tdesign.tencent.com/react/overview"
-            target="_blank"
-            theme="primary"
-            variant="text"
-          >
-            TDesign React 文档
-          </Button>
-        </Space>
-      </Card>
-      <Card bordered={false} title="使用提示">
-        <ul className="guide-tips">
-          <li>推荐主色与输入色锚点可能不同；A 表示输入色，R 表示算法推荐色。</li>
-          <li>3–9 阶仅生成色阶；主题与 TDesign 导出需要至少 10 阶。</li>
-          <li>深色主题采用独立语义映射，不是将浅色色阶倒序。</li>
-          <li>严格校验失败时保留上次有效结果，并暂停导出。</li>
-          <li>方案保存在当前浏览器，清除站点数据后无法恢复。</li>
-        </ul>
-      </Card>
-    </div>
-  );
-}
+export { Guide } from './Guide';

@@ -1,11 +1,14 @@
 # API
 
+相邻色阶诊断 `LOW_ADJACENT_DIFFERENCE` 使用 OKLab 欧氏色差，当前提示阈值为 0.025（经验值，并非 WCAG 标准）。品牌色阶为 `warning`，中性色阶为 `info`，因为细微差异可用于背景层次；颜色重复的 `DUPLICATE_STOPS` 仍为 `warning`。这些提示不代表生成失败。`details` 包含 `scale`（brand/neutral）、`metric`、`threshold` 和 `pairs`；每对含从 0 开始的 `from`、`to` 索引及实际 `distance`。
+
 ## `generateColorScale(seed, options?)`
 
 生成品牌色阶。
 
 ```ts
 interface ColorScaleOptions {
+  endpoints?: 'curve' | 'black-white';
   steps?: number;
   strategy?: 'fixed-anchor' | 'adaptive-anchor' | 'tonal';
   anchorIndex?: number;
@@ -19,6 +22,7 @@ interface ColorScaleOptions {
 
 - `steps`：默认 10，允许 3～20；v1 的标准视觉预设是 10 阶。
 - `strategy`：默认 `tonal`。
+- `endpoints`：默认 `curve`，保留预设或自定义曲线的端点行为；`black-white` 将整条明度曲线归一化到 1→0，首尾色度强制为 0。适用于三种策略，仅影响品牌色阶。固定锚点必须位于中间阶位，否则抛出 `INVALID_OPTIONS`。自定义曲线也遵循此归一化规则，内部色度倍率保持不变。
 - `anchorIndex`：仅能用于 `fixed-anchor`，从 0 开始，默认 5。
 - `hueShift`：可以为所有阶位增加同一个角度，也可以传入与阶数等长的数组。
 - `lightnessCurve`：必须与阶数等长，值位于 0～1 且严格递减。

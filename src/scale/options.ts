@@ -8,6 +8,7 @@ import { ColorScaleError } from '../diagnostics/error.js';
 import type { ColorOutputFormat, ColorScaleOptions, ScaleStrategy } from '../types.js';
 
 export interface ResolvedScaleOptions {
+  endpoints: 'curve' | 'black-white';
   steps: number;
   strategy: ScaleStrategy;
   anchorIndex: number;
@@ -41,6 +42,10 @@ function assertCurve(
 }
 
 export function resolveScaleOptions(options: ColorScaleOptions = {}): ResolvedScaleOptions {
+  const endpoints = options.endpoints ?? 'curve';
+  if (endpoints !== 'curve' && endpoints !== 'black-white') {
+    throw new ColorScaleError('INVALID_OPTIONS', `Unknown endpoints mode: ${endpoints}`, { endpoints });
+  }
   const steps = options.steps ?? DEFAULT_STEPS;
   if (!Number.isInteger(steps) || steps < MIN_STEPS || steps > MAX_STEPS) {
     throw new ColorScaleError(
@@ -91,6 +96,12 @@ export function resolveScaleOptions(options: ColorScaleOptions = {}): ResolvedSc
     (value, index, values) =>
       value >= 0 && value <= 1 && (index === 0 || value < (values[index - 1] ?? 0)),
   );
+  if (
+    endpoints === 'black-white' && strategy === 'fixed-anchor' &&
+    (anchorIndex === 0 || anchorIndex === steps - 1)
+  ) {
+    throw new ColorScaleError('INVALID_OPTIONS', 'black-white endpoints require an interior fixed anchor.', { anchorIndex });
+  }
   assertCurve(options.chromaCurve, steps, 'chromaCurve', (value) => value >= 0);
 
   const hueShift = options.hueShift ?? 0;
@@ -106,6 +117,7 @@ export function resolveScaleOptions(options: ColorScaleOptions = {}): ResolvedSc
   }
 
   return {
+    endpoints,
     steps,
     strategy,
     anchorIndex,

@@ -13,7 +13,7 @@ export function mergeMessages(...groups: readonly DiagnosticMessage[][]): Diagno
   const result: DiagnosticMessage[] = [];
 
   for (const message of groups.flat()) {
-    const key = `${message.code}:${message.message}:${message.stopIndexes?.join(',') ?? ''}`;
+    const key = JSON.stringify(message);
     if (!seen.has(key)) {
       seen.add(key);
       result.push(message);

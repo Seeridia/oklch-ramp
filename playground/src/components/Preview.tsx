@@ -1,4 +1,4 @@
-import { useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import {
   Alert,
   Button,
@@ -6,7 +6,6 @@ import {
   Checkbox,
   ConfigProvider,
   Dialog,
-  Input,
   Pagination,
   Radio,
   Select,
@@ -27,7 +26,8 @@ import {
 } from 'tdesign-icons-react';
 import type { ColorThemeResult, SemanticTheme } from 'oklch-ramp';
 import { toTDesignTheme } from '../adapters/tdesign';
-import { Field } from './Controls';
+import { AccessibleInput, Field } from './Controls';
+import { readUrlParam, updateUrlParams } from '../url-state';
 interface Project {
   id: string;
   name: string;
@@ -52,6 +52,7 @@ function PreviewCanvas({
   neutral: ColorThemeResult['scales']['neutral'];
 }) {
   const host = useRef<HTMLDivElement>(null);
+  const urlSuffix = theme.mode === 'light' ? 'Light' : 'Dark';
   const [checked, setChecked] = useState(true);
   const [enabled, setEnabled] = useState(true);
   const [radio, setRadio] = useState('a');
@@ -59,19 +60,36 @@ function PreviewCanvas({
   const [sampleTab, setSampleTab] = useState('overview');
   const [input, setInput] = useState('品牌设计系统');
   const [choice, setChoice] = useState('design');
-  const [search, setSearch] = useState('');
-  const [status, setStatus] = useState('all');
-  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState(() => readUrlParam(`projectSearch${urlSuffix}`, ''));
+  const [status, setStatus] = useState(() => readUrlParam(`projectStatus${urlSuffix}`, 'all'));
+  const [page, setPage] = useState(() => {
+    const value = Number(readUrlParam(`projectPage${urlSuffix}`, '1'));
+    return Number.isInteger(value) && value > 0 ? value : 1;
+  });
   const [projects, setProjects] = useState(PROJECTS);
   const [editing, setEditing] = useState<Project | null>(null);
   const [name, setName] = useState('');
   const filtered = projects.filter(
     (p) => p.name.includes(search) && (status === 'all' || p.status === status),
   );
+  useEffect(() => {
+    const syncFromUrl = () => {
+      setSearch(readUrlParam(`projectSearch${urlSuffix}`, ''));
+      setStatus(readUrlParam(`projectStatus${urlSuffix}`, 'all'));
+      const nextPage = Number(readUrlParam(`projectPage${urlSuffix}`, '1'));
+      setPage(Number.isInteger(nextPage) && nextPage > 0 ? nextPage : 1);
+    };
+    window.addEventListener('popstate', syncFromUrl);
+    return () => window.removeEventListener('popstate', syncFromUrl);
+  }, [urlSuffix]);
   return (
     <div className="preview-frame">
       <div className="preview-frame-label">
-        {theme.mode === 'light' ? <SunnyIcon /> : <MoonIcon />}{' '}
+        {theme.mode === 'light' ? (
+          <SunnyIcon aria-hidden="true" />
+        ) : (
+          <MoonIcon aria-hidden="true" />
+        )}{' '}
         {theme.mode === 'light' ? '浅色主题' : '深色主题'}
         <span>LIVE PREVIEW</span>
       </div>
@@ -83,7 +101,7 @@ function PreviewCanvas({
       >
         <ConfigProvider globalConfig={{ attach: () => host.current! }}>
           <div className="preview-brand">
-            <LayersIcon />
+            <LayersIcon aria-hidden="true" />
             <strong>Design Workspace</strong>
             <Tag size="small" theme="primary" variant="light">
               团队版
@@ -120,14 +138,17 @@ function PreviewCanvas({
                   表单 <span>Form</span>
                 </h4>
                 <div className="preview-form">
-                  <Input
+                  <AccessibleInput
                     aria-label={`${theme.mode} 示例名称`}
+                    name={`${theme.mode}-sample-name`}
                     value={input}
                     onChange={setInput}
-                    placeholder="请输入名称"
+                    placeholder="例如：品牌设计系统…"
+                    autocomplete="off"
                   />
                   <Select
                     aria-label={`${theme.mode} 示例分类`}
+                    inputProps={{ name: `${theme.mode}-sample-category`, autocomplete: 'off' }}
                     value={choice}
                     onChange={(v) => setChoice(typeof v === 'string' ? v : 'design')}
                     options={[
@@ -135,8 +156,24 @@ function PreviewCanvas({
                       { label: '产品体验', value: 'product' },
                     ]}
                   />
-                  <Input placeholder="禁用状态" disabled />
-                  <Input placeholder="请完善名称" status="error" />
+                  <AccessibleInput
+                    aria-label={`${theme.mode} 禁用状态示例`}
+                    name={`${theme.mode}-disabled-example`}
+                    value="禁用状态"
+                    disabled
+                  />
+                  <div>
+                    <AccessibleInput
+                      aria-label={`${theme.mode} 错误状态示例`}
+                      aria-describedby={`${theme.mode}-sample-error`}
+                      name={`${theme.mode}-error-example`}
+                      placeholder="例如：请输入项目名称…"
+                      status="error"
+                    />
+                    <p className="preview-field-error" id={`${theme.mode}-sample-error`}>
+                      项目名称不能为空
+                    </p>
+                  </div>
                 </div>
               </section>
               <section>
@@ -148,6 +185,7 @@ function PreviewCanvas({
                     自动同步
                   </Checkbox>
                   <Radio.Group
+                    aria-label={`${theme.mode} 配置方式`}
                     value={radio}
                     onChange={(v) => setRadio(String(v))}
                     options={[
@@ -161,7 +199,11 @@ function PreviewCanvas({
                     aria-label={`${theme.mode} 启用主题`}
                   />
                 </Space>
-                <Slider value={slider} onChange={(v) => setSlider(Number(v))} />
+                <Slider
+                  aria-label={`${theme.mode} 配置强度`}
+                  value={slider}
+                  onChange={(v) => setSlider(Number(v))}
+                />
               </section>
               <section>
                 <h4>
@@ -201,7 +243,7 @@ function PreviewCanvas({
                 </div>
                 <Button
                   theme="primary"
-                  icon={<AddIcon />}
+                  icon={<AddIcon aria-hidden="true" />}
                   onClick={() => {
                     setEditing({ id: '', name: '', status: '进行中', owner: '我' });
                     setName('');
@@ -211,22 +253,40 @@ function PreviewCanvas({
                 </Button>
               </div>
               <div className="business-filter">
-                <Input
+                <AccessibleInput
                   aria-label={`${theme.mode} 搜索项目`}
-                  prefixIcon={<SearchIcon />}
-                  placeholder="搜索项目名称"
+                  name={`${theme.mode}-project-search`}
+                  prefixIcon={<SearchIcon aria-hidden="true" />}
+                  placeholder="例如：品牌设计系统…"
+                  autocomplete="off"
                   value={search}
                   onChange={(v) => {
                     setSearch(v);
                     setPage(1);
+                    updateUrlParams(
+                      {
+                        [`projectSearch${urlSuffix}`]: v || null,
+                        [`projectPage${urlSuffix}`]: null,
+                      },
+                      'replace',
+                    );
                   }}
                 />
                 <Select
                   aria-label={`${theme.mode} 项目状态`}
+                  inputProps={{ name: `${theme.mode}-project-status`, autocomplete: 'off' }}
                   value={status}
                   onChange={(v) => {
-                    setStatus(typeof v === 'string' ? v : 'all');
+                    const value = typeof v === 'string' ? v : 'all';
+                    setStatus(value);
                     setPage(1);
+                    updateUrlParams(
+                      {
+                        [`projectStatus${urlSuffix}`]: value === 'all' ? null : value,
+                        [`projectPage${urlSuffix}`]: null,
+                      },
+                      'replace',
+                    );
                   }}
                   options={['all', '进行中', '已完成', '待开始'].map((v) => ({
                     value: v,
@@ -280,13 +340,20 @@ function PreviewCanvas({
                 ]}
               />
               <Pagination
+                aria-label={`${theme.mode} 项目分页`}
                 size="small"
                 total={filtered.length}
                 current={page}
                 pageSize={4}
                 showPageSize={false}
                 showJumper={false}
-                onCurrentChange={setPage}
+                onCurrentChange={(value) => {
+                  setPage(value);
+                  updateUrlParams(
+                    { [`projectPage${urlSuffix}`]: value === 1 ? null : value },
+                    'replace',
+                  );
+                }}
               />
             </div>
           )}
@@ -297,7 +364,7 @@ function PreviewCanvas({
                 variant="text"
                 shape="square"
                 aria-label="关闭项目对话框"
-                icon={<CloseIcon />}
+                icon={<CloseIcon aria-hidden="true" />}
               />
             }
             visible={editing !== null}
@@ -317,13 +384,16 @@ function PreviewCanvas({
               setPage(1);
             }}
           >
-            <Field label="项目名称">
-              <Input
+            <Field label="项目名称" htmlFor={`${theme.mode}-project-name`}>
+              <AccessibleInput
+                inputId={`${theme.mode}-project-name`}
+                name={`${theme.mode}-project-name`}
                 aria-label="项目名称"
                 value={name}
                 onChange={setName}
-                placeholder="输入项目名称"
+                placeholder="例如：移动端体验升级…"
                 maxlength={40}
+                autocomplete="off"
               />
             </Field>
             <p className="field-hint">这是可交互的演示数据，仅在当前预览中生效。</p>
@@ -334,8 +404,24 @@ function PreviewCanvas({
   );
 }
 export function Preview({ theme }: { theme: ColorThemeResult }) {
-  const [mode, setMode] = useState('both');
-  const [scene, setScene] = useState('components');
+  const [mode, setMode] = useState(() => {
+    const value = readUrlParam('previewMode', 'both');
+    return ['light', 'dark', 'both'].includes(value) ? value : 'both';
+  });
+  const [scene, setScene] = useState(() => {
+    const value = readUrlParam('scene', 'components');
+    return ['components', 'business'].includes(value) ? value : 'components';
+  });
+  useEffect(() => {
+    const syncFromUrl = () => {
+      const nextMode = readUrlParam('previewMode', 'both');
+      const nextScene = readUrlParam('scene', 'components');
+      setMode(['light', 'dark', 'both'].includes(nextMode) ? nextMode : 'both');
+      setScene(['components', 'business'].includes(nextScene) ? nextScene : 'components');
+    };
+    window.addEventListener('popstate', syncFromUrl);
+    return () => window.removeEventListener('popstate', syncFromUrl);
+  }, []);
   return (
     <div className="stack">
       <Card bordered={false} className="preview-toolbar">
@@ -346,22 +432,32 @@ export function Preview({ theme }: { theme: ColorThemeResult }) {
           </div>
           <div className="preview-switches">
             <Radio.Group
+              aria-label="预览内容"
               size="medium"
               theme="button"
               variant="default-filled"
               value={scene}
-              onChange={(v) => setScene(String(v))}
+              onChange={(v) => {
+                const value = String(v);
+                setScene(value);
+                updateUrlParams({ scene: value === 'components' ? null : value });
+              }}
               options={[
                 { label: '组件状态', value: 'components' },
                 { label: '业务场景', value: 'business' },
               ]}
             />
             <Radio.Group
+              aria-label="预览主题模式"
               size="medium"
               theme="button"
               variant="default-filled"
               value={mode}
-              onChange={(v) => setMode(String(v))}
+              onChange={(v) => {
+                const value = String(v);
+                setMode(value);
+                updateUrlParams({ previewMode: value === 'both' ? null : value });
+              }}
               options={[
                 { label: '浅色', value: 'light' },
                 { label: '深色', value: 'dark' },

@@ -83,6 +83,7 @@ export function generateNeutralScale(
   }));
 
   return buildScaleResult({
+    kind: 'neutral',
     seed: parsed.seed,
     strategy: 'tonal',
     anchorIndex: null,

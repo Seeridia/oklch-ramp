@@ -8,7 +8,7 @@ export function resolveBrandCurves(options: ResolvedScaleOptions): {
   lightness: number[];
   chroma: number[];
 } {
-  return {
+  const curves = {
     lightness:
       options.lightnessCurve === undefined
         ? sampleCurve(DEFAULT_BRAND_LIGHTNESS, options.steps)
@@ -18,6 +18,14 @@ export function resolveBrandCurves(options: ResolvedScaleOptions): {
         ? sampleCurve(DEFAULT_BRAND_CHROMA, options.steps)
         : [...options.chromaCurve],
   };
+  if (options.endpoints === 'black-white') {
+    const first = curves.lightness[0]!;
+    const last = curves.lightness.at(-1)!;
+    curves.lightness = curves.lightness.map((value) => (value - last) / (first - last));
+    curves.chroma[0] = 0;
+    curves.chroma[curves.chroma.length - 1] = 0;
+  }
+  return curves;
 }
 
 export function hueAt(

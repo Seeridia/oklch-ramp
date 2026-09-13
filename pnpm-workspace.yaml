@@ -1,2 +1,4 @@
 packages:
   - playground
+allowBuilds:
+  core-js-pure: false

@@ -50,29 +50,29 @@ export function toTDesignTheme(
     '--td-text-color-link': theme.color.text.link,
   });
   if (neutral) {
-    // Official TDesign 1.18.3 neutral-role indices. A 10-stop source is sampled
-    // by position; it is never presented as an independently generated 14-stop scale.
+    // Match TDesign 1.18.3's neutral-role hierarchy. The generated OKLCH ramp has
+    // darker endpoints than TDesign gray, so dark roles use the nearest visual level.
     const n = (index: number) =>
       neutral.stops[Math.round(((index - 1) / 13) * (neutral.stops.length - 1))]!.color;
     const dark = theme.mode === 'dark';
     Object.assign(tokens, {
-      '--td-bg-color-page': n(dark ? 14 : 2),
-      '--td-bg-color-container': dark ? n(13) : '#ffffff',
-      '--td-bg-color-container-hover': n(dark ? 12 : 1),
+      '--td-bg-color-page': n(dark ? 13 : 2),
+      '--td-bg-color-container': dark ? n(12) : '#ffffff',
+      '--td-bg-color-container-hover': n(dark ? 11 : 1),
       '--td-bg-color-container-active': n(dark ? 10 : 3),
       '--td-bg-color-container-select': dark ? n(9) : '#ffffff',
-      '--td-bg-color-secondarycontainer': n(dark ? 12 : 1),
-      '--td-bg-color-secondarycontainer-hover': n(dark ? 11 : 2),
+      '--td-bg-color-secondarycontainer': n(dark ? 11 : 1),
+      '--td-bg-color-secondarycontainer-hover': n(dark ? 10 : 2),
       '--td-bg-color-secondarycontainer-active': n(dark ? 9 : 4),
       '--td-bg-color-component': n(dark ? 11 : 3),
       '--td-bg-color-component-hover': n(dark ? 10 : 4),
       '--td-bg-color-component-active': n(dark ? 9 : 6),
-      '--td-bg-color-component-disabled': n(dark ? 12 : 2),
-      '--td-bg-color-specialcomponent': dark ? n(13) : '#ffffff',
+      '--td-bg-color-component-disabled': n(dark ? 11 : 2),
+      '--td-bg-color-specialcomponent': dark ? n(12) : '#ffffff',
       '--td-border-level-1-color': n(dark ? 11 : 3),
       '--td-component-stroke': n(dark ? 11 : 3),
-      '--td-border-level-2-color': n(dark ? 9 : 4),
-      '--td-component-border': n(dark ? 9 : 4),
+      '--td-border-level-2-color': n(dark ? 10 : 4),
+      '--td-component-border': n(dark ? 10 : 4),
     });
   }
   return tokens;

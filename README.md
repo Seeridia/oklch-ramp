@@ -60,6 +60,16 @@ const theme = generateColorTheme('#0052D9', {
 
 ## 三种策略
 
+品牌色阶支持两种端点模式，默认保持现有曲线行为：
+
+```ts
+generateColorScale('#0052D9', { endpoints: 'curve' });
+generateColorScale('#0052D9', { endpoints: 'black-white' });
+generateColorTheme('#0052D9', { scale: { endpoints: 'black-white' } });
+```
+
+`curve` 保留带色端点；`black-white` 将整条明度曲线拉伸到纯白至纯黑，首尾色度设为零。黑白模式的固定锚点只能选择中间阶位。中性色阶不受该选项影响。
+
 ### `tonal`（默认）
 
 把输入色作为色相和彩度来源，使用完整的标准亮度曲线重建色阶。输入色不保证原样出现在数组中，适合未知质量的用户输入，也最能应对过浅或过深的种子色。
@@ -175,7 +185,7 @@ vp run benchmark
 
 OKRamp 演示站位于 `playground/`，使用 React 19、TDesign React 1.18.3 和 Vite+，直接引用工作区中的引擎源码。界面参考 TDesign React Starter 的侧边导航与卡片布局，覆盖三种策略、阶数与锚点、输出格式、色相偏移、中性色染色、明暗主题、对比度策略和诊断。
 
-提供真实 TDesign 组件与项目列表预览、31 个主题变量映射、通用/TDesign 导出，以及浏览器本地方案保存。浅色、深色预览及其浮层独立作用域。详见 [演示站说明](./playground/README.md)。
+提供真实 TDesign 组件与项目列表预览、31 个主题变量映射，以及通用/TDesign 导出。浅色、深色预览及其浮层独立作用域。详见 [演示站说明](./playground/README.md)。
 
 从仓库根目录启动：
 

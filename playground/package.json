@@ -11,12 +11,15 @@
     "sync:themes": "node scripts/sync-theme-scopes.mjs"
   },
   "dependencies": {
+    "@ant-design/colors": "8.0.1",
     "culori": "4.0.2",
+    "highlight.js": "11.11.1",
     "oklch-ramp": "workspace:*",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "tdesign-icons-react": "0.6.11",
-    "tdesign-react": "1.18.3"
+    "tdesign-react": "1.18.3",
+    "tvision-color": "1.6.0"
   },
   "devDependencies": {
     "@types/culori": "4.0.1",

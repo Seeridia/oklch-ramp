@@ -18,6 +18,7 @@ export interface ScaleCandidate {
 }
 
 interface BuildScaleInput {
+  kind?: 'brand' | 'neutral';
   seed: NormalizedSeed;
   strategy: ScaleStrategy;
   anchorIndex: number | null;
@@ -27,10 +28,11 @@ interface BuildScaleInput {
   messages: DiagnosticMessage[];
 }
 
-function inspectStops(stops: readonly ColorStop[]): DiagnosticMessage[] {
+function inspectStops(stops: readonly ColorStop[], kind: 'brand' | 'neutral'): DiagnosticMessage[] {
   const messages: DiagnosticMessage[] = [];
   const duplicateIndexes: number[] = [];
   const lowDifferenceIndexes: number[] = [];
+  const pairs: { from: number; to: number; distance: number }[] = [];
 
   for (let index = 1; index < stops.length; index += 1) {
     const previous = stops[index - 1];
@@ -38,8 +40,10 @@ function inspectStops(stops: readonly ColorStop[]): DiagnosticMessage[] {
     if (previous === undefined || current === undefined) continue;
 
     if (previous.color === current.color) duplicateIndexes.push(index - 1, index);
-    if (oklchDistance(previous.oklch, current.oklch) < ADJACENT_DIFFERENCE_WARNING) {
+    const distance = oklchDistance(previous.oklch, current.oklch);
+    if (distance < ADJACENT_DIFFERENCE_WARNING) {
       lowDifferenceIndexes.push(index - 1, index);
+      pairs.push({ from: index - 1, to: index, distance });
     }
   }
 
@@ -49,14 +53,16 @@ function inspectStops(stops: readonly ColorStop[]): DiagnosticMessage[] {
       severity: 'warning',
       message: 'One or more adjacent stops become identical after output quantization.',
       stopIndexes: [...new Set(duplicateIndexes)],
+      details: { scale: kind },
     });
   }
   if (lowDifferenceIndexes.length > 0) {
     messages.push({
       code: 'LOW_ADJACENT_DIFFERENCE',
-      severity: 'warning',
+      severity: kind === 'neutral' ? 'info' : 'warning',
       message: 'One or more adjacent stops have a small perceptual difference.',
       stopIndexes: [...new Set(lowDifferenceIndexes)],
+      details: { scale: kind, metric: 'OKLab Euclidean distance', threshold: ADJACENT_DIFFERENCE_WARNING, pairs },
     });
   }
 
@@ -88,7 +94,7 @@ export function buildScaleResult(input: BuildScaleInput): ColorScaleResult {
       stopIndexes: gamutMappedIndexes,
     });
   }
-  messages.push(...inspectStops(stops));
+  messages.push(...inspectStops(stops, input.kind ?? 'brand'));
 
   return {
     seed: input.seed,

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button, Card, Radio, Tag, Tooltip, MessagePlugin } from 'tdesign-react';
 import { CopyIcon, InfoCircleIcon, CheckIcon } from 'tdesign-icons-react';
 import { chooseContrastingForeground, type ColorScaleResult, type ColorStop } from 'oklch-ramp';
@@ -19,7 +19,7 @@ export function CopyButton({ value, label = '复制颜色值' }: { value: string
         variant="text"
         shape="square"
         size="small"
-        icon={<CopyIcon />}
+        icon={<CopyIcon aria-hidden="true" />}
         onClick={() => void copyText(value)}
       />
     </Tooltip>
@@ -38,20 +38,43 @@ export function ScaleStrip({
   compact?: boolean;
   format?: DisplayFormat;
 }) {
+  const stripRef = useRef<HTMLDivElement>(null);
+  const [overflowing, setOverflowing] = useState(false);
+  const activeIndex = selected === undefined ? undefined : Math.min(selected, result.stops.length - 1);
+  useEffect(() => {
+    const strip = stripRef.current;
+    if (!strip) return;
+    const revealSelection = () => {
+      setOverflowing(strip.scrollWidth > strip.clientWidth + 1);
+      if (activeIndex === undefined) return;
+      const button = strip.children[activeIndex] as HTMLElement | undefined;
+      if (!button) return;
+      const bounds = strip.getBoundingClientRect();
+      const selectedBounds = button.getBoundingClientRect();
+      if (selectedBounds.left < bounds.left) strip.scrollLeft += selectedBounds.left - bounds.left;
+      else if (selectedBounds.right > bounds.right) strip.scrollLeft += selectedBounds.right - bounds.right;
+    };
+    const observer = new ResizeObserver(revealSelection);
+    observer.observe(strip);
+    revealSelection();
+    return () => observer.disconnect();
+  }, [activeIndex, result.stops.length, compact, format]);
   return (
     <div
+      ref={stripRef}
       className={`scale-strip ${compact ? 'compact' : ''}`}
+      data-overflow={overflowing}
       style={{
-        gridTemplateColumns: `repeat(${result.stops.length}, minmax(${compact ? 32 : 80}px, 1fr))`,
+        gridTemplateColumns: `repeat(${result.stops.length}, minmax(${compact ? '32px' : 'var(--scale-stop-min, 80px)'}, 1fr))`,
       }}
     >
       {result.stops.map((stop) => (
         <button
           type="button"
-          className={`scale-stop ${selected === stop.index ? 'selected' : ''}`}
+          className={`scale-stop ${activeIndex === stop.index ? 'selected' : ''}`}
           key={stop.index}
           aria-label={`第 ${stop.label} 阶 ${stop.color}`}
-          aria-pressed={selected === stop.index}
+          aria-pressed={activeIndex === stop.index}
           onClick={() =>
             onSelect ? onSelect(stop.index) : void copyText(displayColor(stop.color, format))
           }
@@ -67,7 +90,7 @@ export function ScaleStrip({
             ) : result.recommendedIndex === stop.index ? (
               <span className="stop-marker">R</span>
             ) : null}
-            {selected === stop.index && <CheckIcon className="selected-check" />}
+            {activeIndex === stop.index && <CheckIcon className="selected-check" aria-hidden="true" />}
           </span>
           {!compact && (
             <span className="stop-meta">
@@ -154,82 +177,92 @@ export function Scales({
   format: DisplayFormat;
   onFormat: (format: DisplayFormat) => void;
 }) {
-  const [selected, setSelected] = useState({ kind: 'brand', index: 6 });
+  const [selected, setSelected] = useState({ kind: 'brand', index: result.scale.recommendedIndex });
   const selectedScale = selected.kind === 'brand' ? result.scale : result.neutral;
   const stop = selectedScale.stops[Math.min(selected.index, selectedScale.stops.length - 1)];
   return (
-    <div className="stack">
-      <Card bordered={false} className="palette-card">
-        <div className="section-heading">
-          <div>
-            <h3>
-              品牌色阶{' '}
-              <Tag size="small" variant="light">
-                {result.scale.stops.length} 阶
-              </Tag>
-            </h3>
-            <p>从浅到深，构建有层次的品牌表达</p>
+    <div className="stack scales-layout">
+      <div className="scales-main">
+        <Card bordered={false} className="palette-card">
+          <div className="section-heading">
+            <div>
+              <h3>
+                品牌色阶{' '}
+                <Tag size="small" variant="light">
+                  {result.scale.stops.length} 阶
+                </Tag>
+              </h3>
+              <p>从浅到深，构建有层次的品牌表达</p>
+            </div>
+            <Radio.Group
+              aria-label="颜色显示格式"
+              theme="button"
+              size="small"
+              variant="default-filled"
+              value={format}
+              onChange={(value) => onFormat(value as DisplayFormat)}
+              options={[
+                { value: 'hex', label: 'HEX' },
+                { value: 'rgb', label: 'RGB' },
+                { value: 'oklch', label: 'OKLCH' },
+              ]}
+            />
           </div>
-          <Radio.Group
-            theme="button"
-            size="small"
-            variant="default-filled"
-            value={format}
-            onChange={(value) => onFormat(value as DisplayFormat)}
-            options={[
-              { value: 'hex', label: 'HEX' },
-              { value: 'rgb', label: 'RGB' },
-              { value: 'oklch', label: 'OKLCH' },
-            ]}
-          />
-        </div>
-        <ScaleStrip
-          result={result.scale}
-          selected={selected.kind === 'brand' ? selected.index : undefined}
-          onSelect={(index) => setSelected({ kind: 'brand', index })}
-          format={format}
-        />
-        <div className="palette-legend">
-          <span>
-            <i>A</i> 输入色锚点
-          </span>
-          <span>
-            <i>R</i> 推荐主色
-          </span>
-          <span className="legend-note">
-            <InfoCircleIcon /> 点击色块查看详情
-          </span>
-        </div>
-      </Card>
-      <Card bordered={false} className="palette-card neutral-card">
-        <div className="section-heading">
-          <div>
-            <h3>
-              品牌关联中性色{' '}
-              <Tag size="small" variant="light">
-                {result.neutral.stops.length} 阶
-              </Tag>
-            </h3>
-            <p>轻微融入品牌色相，用于背景、文字与边框</p>
+          <div className="scale-scroll-shell brand-scale-scroll">
+            <ScaleStrip
+              result={result.scale}
+              selected={selected.kind === 'brand' ? selected.index : undefined}
+              onSelect={(index) => setSelected({ kind: 'brand', index })}
+              format={format}
+            />
           </div>
-          <CopyButton
-            value={result.neutral.colors.map((color) => displayColor(color, format)).join(', ')}
-            label="复制中性色阶"
-          />
-        </div>
-        <ScaleStrip
-          result={result.neutral}
-          selected={selected.kind === 'neutral' ? selected.index : undefined}
-          onSelect={(index) => setSelected({ kind: 'neutral', index })}
-          format={format}
-          compact
-        />
-        <div className="neutral-labels">
-          <span>浅色背景</span>
-          <span>边框与辅助元素</span>
-          <span>深色文字</span>
-        </div>
-      </Card>
+          <p className="scale-scroll-hint brand-scale-hint">左右滑动查看更多色阶</p>
+          <p className="scale-density-note">紧凑显示 · 点击色块在详情中查看完整颜色值</p>
+          <div className="palette-legend">
+            <span>
+              <i>A</i> 输入色锚点
+            </span>
+            <span>
+              <i>R</i> 推荐主色
+            </span>
+            <span className="legend-note">
+              <InfoCircleIcon aria-hidden="true" /> 点击色块查看详情
+            </span>
+          </div>
+        </Card>
+        <Card bordered={false} className="palette-card neutral-card">
+          <div className="section-heading">
+            <div>
+              <h3>
+                品牌关联中性色{' '}
+                <Tag size="small" variant="light">
+                  {result.neutral.stops.length} 阶
+                </Tag>
+              </h3>
+              <p>轻微融入品牌色相，用于背景、文字与边框</p>
+            </div>
+            <CopyButton
+              value={result.neutral.colors.map((color) => displayColor(color, format)).join(', ')}
+              label="复制中性色阶"
+            />
+          </div>
+          <div className="scale-scroll-shell neutral-scale-scroll">
+            <ScaleStrip
+              result={result.neutral}
+              selected={selected.kind === 'neutral' ? selected.index : undefined}
+              onSelect={(index) => setSelected({ kind: 'neutral', index })}
+              format={format}
+              compact
+            />
+          </div>
+          <p className="scale-scroll-hint neutral-scale-hint">左右滑动查看更多色阶</p>
+          <div className="neutral-labels">
+            <span>浅色背景</span>
+            <span>边框与辅助元素</span>
+            <span>深色文字</span>
+          </div>
+        </Card>
+      </div>
       {stop && <Inspector stop={stop} kind={selected.kind === 'brand' ? '品牌色' : '中性色'} />}
     </div>
   );

@@ -7,13 +7,10 @@ import {
   Card,
   Checkbox,
   ConfigProvider,
-  Dialog,
   Drawer,
   Empty,
-  Input,
   Layout,
   Menu,
-  MessagePlugin,
   Radio,
   Select,
   Space,
@@ -29,13 +26,12 @@ import {
   CloseIcon,
   CodeIcon,
   DownloadIcon,
-  FolderIcon,
+  LogoGithubIcon,
   LayersIcon,
   MenuFoldIcon,
   MenuUnfoldIcon,
   MoonIcon,
   RefreshIcon,
-  SaveIcon,
   SettingIcon,
   SunnyIcon,
 } from 'tdesign-icons-react';
@@ -43,24 +39,19 @@ import { Controls, Field } from './components/Controls';
 import { Scales, copyText } from './components/Scales';
 import { Preview } from './components/Preview';
 import { Comparison, Diagnostics, Guide, Tokens } from './components/Analysis';
-import {
-  DEFAULTS,
-  STRATEGIES,
-  generate,
-  persistSchemes,
-  readSchemes,
-  type DisplayFormat,
-  type SavedScheme,
-  type Settings,
-} from './model';
+import { DEFAULTS, generate, generateComparison, type DisplayFormat, type Settings } from './model';
 import { createExport, type ExportFormat, type ExportMode, type ExportTarget } from './export';
 import { toTDesignTheme } from './adapters/tdesign';
+import { readUrlParam, updateUrlParams, urlWithParams } from './url-state';
+import { readSettings, writeSettings } from './settings-url';
 
 const NAV = [
-  { value: 'workspace', label: '色彩工作台', icon: <AppIcon /> },
-  { value: 'compare', label: '策略对比', icon: <ChartBarIcon /> },
-  { value: 'guide', label: '使用指南', icon: <BookOpenIcon /> },
+  { value: 'workspace', label: '色彩工作台', icon: <AppIcon aria-hidden="true" /> },
+  { value: 'compare', label: '方案对比', icon: <ChartBarIcon aria-hidden="true" /> },
+  { value: 'guide', label: '使用指南', icon: <BookOpenIcon aria-hidden="true" /> },
 ];
+const PAGES = new Set(NAV.map((item) => item.value));
+const TABS = new Set(['scale', 'preview', 'tokens', 'diagnostics']);
 function initialMode(): 'light' | 'dark' {
   try {
     return (localStorage.getItem('okramp-ui-mode') ??
@@ -72,7 +63,11 @@ function initialMode(): 'light' | 'dark' {
   }
 }
 export function App() {
-  const [settings, setSettings] = useState<Settings>(DEFAULTS);
+  const [settings, storeSettings] = useState<Settings>(() => readSettings('workspace'));
+  const setSettings = (next: Settings) => {
+    storeSettings(next);
+    writeSettings('workspace', next);
+  };
   const attempt = useMemo(() => {
     try {
       return { result: generate(settings), error: '' };
@@ -85,8 +80,30 @@ export function App() {
     if (attempt.result) setLastValid(attempt.result);
   }, [attempt.result]);
   const result = attempt.result ?? lastValid;
-  const [page, setPage] = useState('workspace');
-  const [tab, setTab] = useState('scale');
+  const [page, setPage] = useState(() => {
+    const value = readUrlParam('page', 'workspace');
+    return PAGES.has(value) ? value : 'workspace';
+  });
+  const [comparisonSettings, storeComparisonSettings] = useState<Settings>(() => readSettings('compare'));
+  const setComparisonSettings = (next: Settings) => {
+    storeComparisonSettings(next);
+    writeSettings('compare', next);
+  };
+  const comparisonAttempt = useMemo(() => {
+    try {
+      return { result: generateComparison(comparisonSettings), error: '' };
+    } catch (error) {
+      return { result: undefined, error: error instanceof Error ? error.message : String(error) };
+    }
+  }, [comparisonSettings]);
+  const [lastComparison, setLastComparison] = useState(() => generateComparison(DEFAULTS));
+  useEffect(() => {
+    if (comparisonAttempt.result) setLastComparison(comparisonAttempt.result);
+  }, [comparisonAttempt.result]);
+  const [tab, setTab] = useState(() => {
+    const value = readUrlParam('tab', 'scale');
+    return TABS.has(value) ? value : 'scale';
+  });
   const [collapsed, setCollapsed] = useState(false);
   const [mobileNav, setMobileNav] = useState(false);
   const [controlsOpen, setControlsOpen] = useState(false);
@@ -98,11 +115,6 @@ export function App() {
   const [exportFormat, setExportFormat] = useState<ExportFormat>('css');
   const [exportMode, setExportMode] = useState<ExportMode>('both');
   const [sections, setSections] = useState(['brand', 'neutral', 'semantic']);
-  const [schemes, setSchemes] = useState(readSchemes);
-  const [schemeName, setSchemeName] = useState('未命名方案');
-  const [saveOpen, setSaveOpen] = useState(false);
-  const [savedOpen, setSavedOpen] = useState(false);
-  const [nameDraft, setNameDraft] = useState('');
   useEffect(() => {
     document.documentElement.setAttribute('theme-mode', uiMode);
     try {
@@ -112,19 +124,51 @@ export function App() {
     }
   }, [uiMode]);
   useEffect(() => {
+    const hideDecorativeIcons = () => {
+      for (const icon of document.querySelectorAll('svg.t-icon:not([aria-hidden])')) {
+        icon.setAttribute('aria-hidden', 'true');
+        icon.setAttribute('focusable', 'false');
+      }
+    };
+    hideDecorativeIcons();
+    const observer = new MutationObserver(hideDecorativeIcons);
+    observer.observe(document.body, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, []);
+  useEffect(() => {
+    const syncFromUrl = () => {
+      storeSettings(readSettings('workspace'));
+      storeComparisonSettings(readSettings('compare'));
+      const nextPage = readUrlParam('page', 'workspace');
+      const nextTab = readUrlParam('tab', 'scale');
+      setPage(PAGES.has(nextPage) ? nextPage : 'workspace');
+      setTab(TABS.has(nextTab) ? nextTab : 'scale');
+    };
+    window.addEventListener('popstate', syncFromUrl);
+    return () => window.removeEventListener('popstate', syncFromUrl);
+  }, []);
+  useEffect(() => {
     const values =
       applyToShell && result.theme?.themes[uiMode]
         ? toTDesignTheme(result.theme.themes[uiMode]!, result.theme.scales.neutral)
         : {};
     for (const [key, value] of Object.entries(values))
       document.documentElement.style.setProperty(key, value);
+    const themeColor = getComputedStyle(document.documentElement)
+      .getPropertyValue('--td-bg-color-page')
+      .trim();
+    document
+      .querySelector('meta[name="theme-color"]')
+      ?.setAttribute('content', themeColor || (uiMode === 'dark' ? '#181818' : '#f5f7fa'));
     return () => {
       for (const key of Object.keys(values)) document.documentElement.style.removeProperty(key);
     };
   }, [applyToShell, result.theme, uiMode]);
+  useEffect(() => {
+    if (page !== 'guide') document.title = `${NAV.find((item) => item.value === page)?.label ?? '色彩工作台'} · OKRamp`;
+  }, [page]);
   const messages = result.theme?.diagnostics.messages ?? result.scale.diagnostics.messages;
   const warningCount = messages.filter((m) => m.severity !== 'info').length;
-  const checks = result.theme?.diagnostics.contrastChecks ?? [];
   const exportDisabled =
     Boolean(attempt.error) ||
     sections.length === 0 ||
@@ -139,7 +183,18 @@ export function App() {
   });
   const changePage = (value: string) => {
     setPage(value);
+    updateUrlParams({ page: value === 'workspace' ? null : value });
     setMobileNav(false);
+  };
+  const changeTab = (value: string) => {
+    setTab(value);
+    updateUrlParams({ tab: value === 'scale' ? null : value });
+  };
+  const openWorkspace = (workspaceTab = 'scale') => {
+    setPage('workspace');
+    setTab(workspaceTab);
+    setMobileNav(false);
+    updateUrlParams({ page: null, tab: workspaceTab === 'scale' ? null : workspaceTab });
   };
   const navigation = (
     <Menu
@@ -155,25 +210,6 @@ export function App() {
       ))}
     </Menu>
   );
-  function saveScheme() {
-    if (!nameDraft.trim() || attempt.error) return;
-    const scheme: SavedScheme = {
-      id: crypto.randomUUID(),
-      name: nameDraft.trim(),
-      settings: { ...settings },
-      savedAt: new Date().toISOString(),
-    };
-    const next = [scheme, ...schemes].slice(0, 50);
-    try {
-      persistSchemes(next);
-      setSchemes(next);
-      setSchemeName(scheme.name);
-      setSaveOpen(false);
-      void MessagePlugin.success('方案已保存在当前浏览器');
-    } catch {
-      void MessagePlugin.error('本地存储不可用，方案未保存。请导出 JSON 备份。');
-    }
-  }
   function download() {
     const url = URL.createObjectURL(
       new Blob([exportValue], {
@@ -195,37 +231,32 @@ export function App() {
         <Layout.Aside width={collapsed ? '64px' : '208px'} className="app-sidebar">
           <a
             className="brand-logo"
-            href="#"
+            href={urlWithParams({ page: null, tab: null })}
             onClick={(e) => {
+              if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
               e.preventDefault();
-              changePage('workspace');
+              openWorkspace();
             }}
             aria-label="OKRamp 首页"
           >
             <span className="brand-icon">
-              <LayersIcon />
+              <LayersIcon aria-hidden="true" />
             </span>
-            {!collapsed && (
-              <span>
-                OKRamp<small>OKLCH 色彩主题工作台</small>
-              </span>
-            )}
+            {!collapsed && <span>OKRamp</span>}
           </a>
-          <div className="nav-caption">{collapsed ? '·' : '设计工具'}</div>
           {navigation}
           <div className="sidebar-bottom">
-            {!collapsed && (
-              <div className="sidebar-note">
-                <span className="status-dot" /> 本地运行 · 无需上传颜色
-                <br />
-                <small>Powered by TDesign React</small>
-              </div>
-            )}
             <Button
               variant="text"
               shape="square"
               aria-label={collapsed ? '展开导航' : '折叠导航'}
-              icon={collapsed ? <MenuUnfoldIcon /> : <MenuFoldIcon />}
+              icon={
+                collapsed ? (
+                  <MenuUnfoldIcon aria-hidden="true" />
+                ) : (
+                  <MenuFoldIcon aria-hidden="true" />
+                )
+              }
               onClick={() => setCollapsed(!collapsed)}
             />
           </div>
@@ -238,7 +269,7 @@ export function App() {
                 shape="square"
                 variant="text"
                 aria-label="打开导航"
-                icon={<MenuUnfoldIcon />}
+                icon={<MenuUnfoldIcon aria-hidden="true" />}
                 onClick={() => setMobileNav(true)}
               />
               <Breadcrumb
@@ -248,16 +279,16 @@ export function App() {
                 ]}
               />
             </div>
-            <Space size={12}>
+            <Space size={12} align="center" className="header-actions">
               <Tag variant="light" className="header-version">
-                OKLCH ENGINE
+                OKRAMP
               </Tag>
               <Tooltip content="查看源码">
                 <Button
                   aria-label="查看源码"
                   variant="text"
                   shape="square"
-                  icon={<CodeIcon />}
+                  icon={<LogoGithubIcon aria-hidden="true" />}
                   href="https://github.com/Seeridia/oklch-ramp"
                   target="_blank"
                 />
@@ -267,13 +298,20 @@ export function App() {
                   aria-label={uiMode === 'light' ? '切换深色界面' : '切换浅色界面'}
                   variant="text"
                   shape="square"
-                  icon={uiMode === 'light' ? <MoonIcon /> : <SunnyIcon />}
+                  icon={
+                    uiMode === 'light' ? (
+                      <MoonIcon aria-hidden="true" />
+                    ) : (
+                      <SunnyIcon aria-hidden="true" />
+                    )
+                  }
                   onClick={() => setUiMode(uiMode === 'light' ? 'dark' : 'light')}
                 />
               </Tooltip>
             </Space>
           </Layout.Header>
           <Layout.Content className="app-content" id="main-content">
+            {page !== 'guide' && (
             <div className="page-heading">
               <div>
                 <h1>{NAV.find((n) => n.value === page)?.label}</h1>
@@ -281,116 +319,83 @@ export function App() {
                   {page === 'workspace'
                     ? '从一个主色，构建协调、可用的色彩主题。'
                     : page === 'compare'
-                      ? '相同的起点，不同的色彩表达。'
+                      ? '相同的主色，对比不同颜色空间的生成效果。'
                       : '了解色彩策略，把设计带入代码。'}
                 </p>
               </div>
               {page !== 'guide' && (
                 <Space breakLine size={8} className="page-actions">
-                  <Button
+                  {page === 'workspace' && <Button
+                    className="mobile-settings"
                     theme="default"
                     variant="outline"
-                    icon={<FolderIcon />}
-                    onClick={() => setSavedOpen(true)}
-                  >
-                    我的方案
-                  </Button>
-                  <Button
-                    theme="default"
-                    variant="outline"
-                    icon={<SaveIcon />}
-                    disabled={Boolean(attempt.error)}
-                    onClick={() => {
-                      setNameDraft(
-                        schemeName === '未命名方案' ? `主题 ${result.settings.seed}` : schemeName,
-                      );
-                      setSaveOpen(true);
-                    }}
-                  >
-                    保存
-                  </Button>
-                  <Button
-                    theme="primary"
-                    icon={<DownloadIcon />}
-                    disabled={Boolean(attempt.error)}
-                    onClick={() => setExportOpen(true)}
-                  >
-                    导出主题
-                  </Button>
-                </Space>
-              )}
-            </div>
-            {page !== 'guide' && (
-              <div className="context-bar">
-                <div>
-                  <span
-                    className="context-swatch"
-                    style={{ background: result.scale.seed.normalized }}
-                  />
-                  <strong>{schemeName}</strong>
-                  <code>{result.scale.seed.normalized.toUpperCase()}</code>
-                  <span className="context-divider" />
-                  <span>{STRATEGIES.find((s) => s.value === result.settings.strategy)?.label}</span>
-                </div>
-                <Space size={12}>
-                  <Button
-                    className={page === 'compare' ? 'compare-settings' : 'mobile-settings'}
-                    size="small"
-                    variant="text"
-                    icon={<SettingIcon />}
+                    icon={<SettingIcon aria-hidden="true" />}
                     onClick={() => setControlsOpen(true)}
                   >
                     参数
-                  </Button>
+                  </Button>}
                   <Button
-                    size="small"
-                    variant="text"
-                    icon={<RefreshIcon />}
+                    theme="default"
+                    variant="outline"
+                    icon={<RefreshIcon aria-hidden="true" />}
                     onClick={() => {
+                      if (page === 'compare') {
+                        setComparisonSettings({ ...DEFAULTS });
+                        return;
+                      }
                       setSettings({ ...DEFAULTS });
-                      setSchemeName('未命名方案');
-                      setApplyToShell(false);
+                      setApplyToShell(true);
                     }}
                   >
                     恢复默认
                   </Button>
+                  {page === 'workspace' && <Button
+                    theme="primary"
+                    icon={<DownloadIcon aria-hidden="true" />}
+                    disabled={Boolean(attempt.error)}
+                    onClick={() => setExportOpen(true)}
+                  >
+                    导出主题
+                  </Button>}
                 </Space>
-              </div>
+              )}
+            </div>
             )}
-            {attempt.error && page !== 'guide' && (
+            {attempt.error && page === 'workspace' && (
               <Alert
                 className="generation-error"
                 theme="error"
                 title="当前配置生成失败，正在展示上次有效结果"
-                message={`${attempt.error} 请修改参数后重试；保存和导出已暂停。`}
+                message={`${attempt.error} 请修改参数后重试；导出已暂停。`}
               />
             )}
             {page === 'guide' ? (
               <Guide />
             ) : (
               <div className={`workspace-grid ${page === 'compare' ? 'compare-workspace' : ''}`}>
-                <Card className="control-card" bordered={false}>
+                {page === 'workspace' && <Card className="control-card" bordered={false}>
                   <Controls settings={settings} onChange={setSettings} error={attempt.error} />
-                </Card>
+                </Card>}
                 <div className="result-area">
                   {page === 'compare' ? (
-                    <Comparison
-                      result={result}
-                      onApply={(strategy) => {
-                        setSettings({ ...settings, strategy });
-                        setPage('workspace');
-                        setTab('scale');
-                      }}
-                    />
+                    <>
+                      {comparisonAttempt.error && <Alert theme="error" message={`${comparisonAttempt.error} 正在展示上次有效结果。`} />}
+                      <Comparison
+                        result={comparisonAttempt.result ?? lastComparison}
+                        settings={comparisonSettings}
+                        onChange={setComparisonSettings}
+                        error={comparisonAttempt.error}
+                      />
+                    </>
                   ) : (
                     <>
                       <div className="result-tabs">
-                        <Tabs value={tab} onChange={(value) => setTab(String(value))}>
+                        <Tabs value={tab} onChange={(value) => changeTab(String(value))}>
                           <Tabs.TabPanel
                             value="scale"
                             label={
                               <span className="tab-label">
-                                <LayersIcon />
+                                <LayersIcon aria-hidden="true" />
                                 色阶
                               </span>
                             }
@@ -399,7 +404,7 @@ export function App() {
                             value="preview"
                             label={
                               <span className="tab-label">
-                                <AppIcon />
+                                <AppIcon aria-hidden="true" />
                                 组件预览
                               </span>
                             }
@@ -408,7 +413,7 @@ export function App() {
                             value="tokens"
                             label={
                               <span className="tab-label">
-                                <CodeIcon />
+                                <CodeIcon aria-hidden="true" />
                                 Token
                               </span>
                             }
@@ -417,7 +422,7 @@ export function App() {
                             value="diagnostics"
                             label={
                               <span className="tab-label">
-                                <CheckCircleIcon />
+                                <CheckCircleIcon aria-hidden="true" />
                                 诊断{warningCount > 0 && <Badge count={warningCount} />}
                               </span>
                             }
@@ -455,17 +460,6 @@ export function App() {
                       )}
                       {tab === 'tokens' && result.theme && <Tokens theme={result.theme} />}
                       {tab === 'diagnostics' && <Diagnostics result={result} />}
-                      <div className="result-footer">
-                        <span>
-                          <CheckCircleIcon /> sRGB 色域映射
-                        </span>
-                        <span>
-                          {checks.length
-                            ? `${checks.filter((c) => c.passes).length}/${checks.length} 个对比度检查通过`
-                            : '色阶模式'}
-                        </span>
-                        <span>浏览器本地计算</span>
-                      </div>
                     </>
                   )}
                 </div>
@@ -487,7 +481,7 @@ export function App() {
               variant="text"
               shape="square"
               aria-label="关闭面板"
-              icon={<CloseIcon />}
+              icon={<CloseIcon aria-hidden="true" />}
             />
           }
           visible={mobileNav}
@@ -506,7 +500,7 @@ export function App() {
               variant="text"
               shape="square"
               aria-label="关闭面板"
-              icon={<CloseIcon />}
+              icon={<CloseIcon aria-hidden="true" />}
             />
           }
           visible={controlsOpen}
@@ -517,35 +511,6 @@ export function App() {
         >
           <Controls settings={settings} onChange={setSettings} error={attempt.error} />
         </Drawer>
-        <Dialog
-          closeBtn={
-            <Button
-              theme="default"
-              variant="text"
-              shape="square"
-              aria-label="关闭对话框"
-              icon={<CloseIcon />}
-            />
-          }
-          visible={saveOpen}
-          header="保存方案"
-          placement="center"
-          width="min(440px, calc(100vw - 32px))"
-          confirmBtn={{ content: '保存到浏览器', disabled: !nameDraft.trim() }}
-          onConfirm={saveScheme}
-          onClose={() => setSaveOpen(false)}
-        >
-          <Field label="方案名称">
-            <Input
-              value={nameDraft}
-              aria-label="方案名称"
-              onChange={setNameDraft}
-              maxlength={40}
-              placeholder="为这套主题起个名字"
-            />
-          </Field>
-          <p className="field-hint">仅保存在当前浏览器，最多保留最近 50 个方案。</p>
-        </Dialog>
         <Drawer
           closeBtn={
             <Button
@@ -553,56 +518,7 @@ export function App() {
               variant="text"
               shape="square"
               aria-label="关闭面板"
-              icon={<CloseIcon />}
-            />
-          }
-          visible={savedOpen}
-          header={`我的方案 · ${schemes.length}`}
-          footer={false}
-          size="min(420px, 100vw)"
-          onClose={() => setSavedOpen(false)}
-        >
-          {schemes.length ? (
-            <div className="saved-schemes">
-              {schemes.map((s) => (
-                <Card key={s.id} size="small">
-                  <div className="saved-scheme">
-                    <span className="saved-swatch" style={{ background: s.settings.seed }} />
-                    <div>
-                      <strong>{s.name}</strong>
-                      <p>
-                        {s.settings.seed} · {new Date(s.savedAt).toLocaleDateString('zh-CN')}
-                      </p>
-                    </div>
-                    <Button
-                      size="small"
-                      theme="primary"
-                      variant="text"
-                      onClick={() => {
-                        setSettings(s.settings);
-                        setSchemeName(s.name);
-                        setSavedOpen(false);
-                        setPage('workspace');
-                      }}
-                    >
-                      载入
-                    </Button>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <Empty description="还没有保存方案。调整主色后，点击「保存」。" />
-          )}
-        </Drawer>
-        <Drawer
-          closeBtn={
-            <Button
-              theme="default"
-              variant="text"
-              shape="square"
-              aria-label="关闭面板"
-              icon={<CloseIcon />}
+              icon={<CloseIcon aria-hidden="true" />}
             />
           }
           visible={exportOpen}
@@ -616,7 +532,7 @@ export function App() {
               </Button>
               <Button
                 theme="primary"
-                icon={<DownloadIcon />}
+                icon={<DownloadIcon aria-hidden="true" />}
                 onClick={download}
                 disabled={exportDisabled}
               >
@@ -628,6 +544,7 @@ export function App() {
           <div className="export-options">
             <Field label="导出目标">
               <Radio.Group
+                aria-label="导出目标"
                 theme="button"
                 variant="default-filled"
                 value={exportTarget}
@@ -641,6 +558,7 @@ export function App() {
             <div className="export-row">
               <Field label="主题范围">
                 <Select
+                  aria-label="主题范围"
                   value={exportMode}
                   onChange={(v) => setExportMode(v as ExportMode)}
                   options={[
@@ -652,6 +570,7 @@ export function App() {
               </Field>
               <Field label="颜色格式">
                 <Select
+                  aria-label="颜色格式"
                   value={format}
                   onChange={(v) => setFormat(v as DisplayFormat)}
                   options={['hex', 'rgb', 'oklch'].map((v) => ({
@@ -663,6 +582,7 @@ export function App() {
             </div>
             <Field label="内容范围">
               <Checkbox.Group
+                aria-label="内容范围"
                 value={sections}
                 onChange={(values) => setSections(values.map(String))}
                 options={[
@@ -679,6 +599,7 @@ export function App() {
             )}
             <Field label="文件格式">
               <Radio.Group
+                aria-label="文件格式"
                 theme="button"
                 variant="default-filled"
                 value={exportFormat}

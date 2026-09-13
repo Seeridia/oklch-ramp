@@ -9,6 +9,7 @@ import { converter, formatHex, formatRgb } from 'culori';
 
 export type DisplayFormat = 'hex' | 'rgb' | 'oklch';
 export interface Settings {
+  endpoints: 'curve' | 'black-white';
   seed: string;
   strategy: ScaleStrategy;
   steps: number;
@@ -21,6 +22,7 @@ export interface Settings {
   nonText: number;
 }
 export const DEFAULTS: Settings = {
+  endpoints: 'curve',
   seed: '#0052D9',
   strategy: 'tonal',
   steps: 10,
@@ -48,6 +50,7 @@ export const STRATEGIES = [
 ] as const;
 export function scaleOptions(settings: Settings) {
   return {
+    endpoints: settings.endpoints,
     steps: settings.steps,
     strategy: settings.strategy,
     hueShift: settings.hueShift,
@@ -84,40 +87,17 @@ export function displayColor(color: string, format: DisplayFormat) {
   }
   return formatHex(color) ?? color;
 }
-export interface SavedScheme {
-  id: string;
-  name: string;
-  settings: Settings;
-  savedAt: string;
-}
-const STORAGE_KEY = 'okramp-schemes-v1';
-const LEGACY_STORAGE_KEY = 'color-studio-schemes-v1';
-export function readSchemes(): SavedScheme[] {
-  try {
-    const raw: unknown = JSON.parse(
-      localStorage.getItem(STORAGE_KEY) ?? localStorage.getItem(LEGACY_STORAGE_KEY) ?? '[]',
-    );
-    if (!Array.isArray(raw)) return [];
-    return raw.filter((item): item is SavedScheme => {
-      if (
-        !item ||
-        typeof item !== 'object' ||
-        typeof item.id !== 'string' ||
-        typeof item.name !== 'string' ||
-        typeof item.savedAt !== 'string'
-      )
-        return false;
-      try {
-        generate(item.settings);
-        return true;
-      } catch {
-        return false;
-      }
-    });
-  } catch {
-    return [];
-  }
-}
-export function persistSchemes(schemes: SavedScheme[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(schemes));
+
+export function generateComparison(settings: Settings) {
+  const comparisonSettings = {
+    ...DEFAULTS,
+    seed: settings.seed,
+    strategy: settings.strategy,
+    anchorIndex: Math.max(0, Math.min(settings.anchorIndex, 9)),
+    steps: 10,
+  };
+  return {
+    settings: comparisonSettings,
+    scale: generateColorScale(comparisonSettings.seed, scaleOptions(comparisonSettings)),
+  };
 }
