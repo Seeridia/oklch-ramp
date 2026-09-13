@@ -39,7 +39,7 @@ SSH 凭据使用仓库 Secrets `DEPLOY_SSH_KEY` 和 `DEPLOY_KNOWN_HOSTS`，不�
 
 `src/adapters/tdesign.ts` 是应用级适配器，不进入核心包。它映射 31 个已在 TDesign 1.18.3 中核对的品牌、背景、文字与边框变量；成功、警告、错误色沿用官方默认值。不是对 TDesign 全部 Token 的逐一重写，也不是官方色阶算法的复刻。
 
-`src/theme-scopes.css` 从已安装 TDesign 的明暗 Token 声明生成，为并排预览提供完整默认值。预览的 ConfigProvider 将弹窗与下拉浮层挂载在对应主题作用域。工作台主题独立，用户可选择「同时应用到工作台」。
+`src/theme-scopes.css` 从已安装 TDesign 的明暗 Token 声明生成，为并排预览提供完整默认值。预览的 ConfigProvider 将弹窗与下拉浮层挂载在对应主题作用域。默认开启「同时应用到工作台」，生成的主题同步用于工作台；取消勾选后恢复独立的工作台主题。
 
 升级 TDesign 后执行并复核：
 

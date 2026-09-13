@@ -92,7 +92,7 @@ export function App() {
   const [controlsOpen, setControlsOpen] = useState(false);
   const [format, setFormat] = useState<DisplayFormat>('hex');
   const [uiMode, setUiMode] = useState(initialMode);
-  const [applyToShell, setApplyToShell] = useState(false);
+  const [applyToShell, setApplyToShell] = useState(true);
   const [exportOpen, setExportOpen] = useState(false);
   const [exportTarget, setExportTarget] = useState<ExportTarget>('tdesign');
   const [exportFormat, setExportFormat] = useState<ExportFormat>('css');
