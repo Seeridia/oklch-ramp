@@ -26,7 +26,7 @@
 
 机器人使用 `GITHUB_TOKEN` 创建的 PR 不会自动触发普通 PR CI，因此流程会显式 dispatch `ci.yml` 到版本分支。主分支发版仍只接受成功的 push CI，不接受 PR 或手动 CI 作为 npm 发布触发。
 
-为新 npm 包 `okramp` 单独配置 Trusted Publisher（旧包的授权不会自动迁移）：
+为新 npm 包 `@okramp/core` 单独配置 Trusted Publisher（旧包的授权不会自动迁移）：
 
 | 字段                 | 值            |
 | -------------------- | ------------- |
@@ -49,4 +49,4 @@
 
 ## 独立适配包
 
-`okramp-tdesign` 位于 `packages/tdesign`，独立版本发布。当前自动版本 PR 与 npm 发布流程只发布核心 `okramp`；CI 同时打包适配包以验证 workspace 依赖。首次发布新包后，需在 npm 为新名称配置 Trusted Publisher。
+`@okramp/tdesign` 位于 `packages/tdesign`，独立版本发布。当前自动版本 PR 与 npm 发布流程只发布核心 `@okramp/core`；CI 同时打包适配包以验证 workspace 依赖。首次发布新包后，需在 npm 为新名称配置 Trusted Publisher。

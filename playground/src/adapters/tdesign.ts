@@ -1,1 +1,1 @@
-export { TOKEN_MAP, semanticValue, toTDesignTheme, mappedThemes } from 'okramp-tdesign';
+export { TOKEN_MAP, semanticValue, toTDesignTheme, mappedThemes } from '@okramp/tdesign';

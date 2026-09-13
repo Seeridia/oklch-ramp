@@ -1,4 +1,4 @@
-import type { ColorScaleResult, ColorThemeResult, SemanticTheme } from 'okramp';
+import type { ColorScaleResult, ColorThemeResult, SemanticTheme } from '@okramp/core';
 
 // Independent TDesign adapter. The framework-agnostic core never imports TDesign.
 export const TOKEN_MAP = [

@@ -13,20 +13,20 @@ Perceptual color ramps and themes powered by OKLCH。OKRamp 是一个基于 Type
 - 结构化诊断、稳定错误码和完整 TypeScript 类型；
 - 浏览器与 Node.js 均可使用，不依赖 DOM。
 
-核心库不依赖 TDesign，也不导出 `--td-*` Token。仓库包含独立的 `okramp-tdesign` 适配包，用于真实组件预览和 CSS/JSON/TypeScript 主题导出。该适配器不属于核心 npm 包 API。
+核心库不依赖 TDesign，也不导出 `--td-*` Token。仓库包含独立的 `@okramp/tdesign` 适配包，用于真实组件预览和 CSS/JSON/TypeScript 主题导出。该适配器不属于核心 npm 包 API。
 
 ## 安装
 
 ```bash
-pnpm add okramp
+pnpm add @okramp/core
 ```
 
-核心包已发布：[okramp](https://www.npmjs.com/package/okramp)，安装使用 `npm install okramp`。
+核心包已发布：[@okramp/core](https://www.npmjs.com/package/@okramp/core)，安装使用 `npm install @okramp/core`。
 
 ## 快速开始
 
 ```ts
-import { generateColorScale, generateColorTheme, generateNeutralScale } from 'okramp';
+import { generateColorScale, generateColorTheme, generateNeutralScale } from '@okramp/core';
 
 const brand = generateColorScale('#0052D9');
 console.log(brand.colors);

@@ -1,6 +1,6 @@
 import { useId, useState } from 'react';
 import { Radio, Select, Slider, Tag } from 'tdesign-react';
-import { generateColorScale, generateNeutralScale, type ScaleStrategy } from 'okramp';
+import { generateColorScale, generateNeutralScale, type ScaleStrategy } from '@okramp/core';
 import { useI18n } from '../i18n';
 import { Field } from './Controls';
 import { ScaleStrip } from './Scales';

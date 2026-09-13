@@ -1,5 +1,5 @@
 {
-  "name": "okramp-tdesign",
+  "name": "@okramp/tdesign",
   "version": "0.1.0",
   "description": "TDesign theme adapter for OKRamp",
   "license": "MIT",
@@ -28,6 +28,6 @@
     "prepack": "vp pack"
   },
   "dependencies": {
-    "okramp": "workspace:*"
+    "@okramp/core": "workspace:*"
   }
 }

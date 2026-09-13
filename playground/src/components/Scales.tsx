@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Button, Card, Radio, Tag, Tooltip, MessagePlugin } from 'tdesign-react';
 import { CopyIcon, InfoCircleIcon, CheckIcon } from 'tdesign-icons-react';
-import { chooseContrastingForeground, type ColorScaleResult, type ColorStop } from 'okramp';
+import { chooseContrastingForeground, type ColorScaleResult, type ColorStop } from '@okramp/core';
 import { displayColor, type DisplayFormat, type Generated } from '../model';
 import { currentLocale, useI18n } from '../i18n';
 export async function copyText(value: string) {

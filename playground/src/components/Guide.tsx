@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type MouseEvent, type ReactNode } from 'react';
 import { Alert, Button, Tag } from 'tdesign-react';
-import { generateColorScale } from 'okramp';
+import { generateColorScale } from '@okramp/core';
 import hljs from 'highlight.js/lib/core';
 import typescript from 'highlight.js/lib/languages/typescript';
 import bash from 'highlight.js/lib/languages/bash';
@@ -81,14 +81,14 @@ function StartDocument({ t }: { t: Translate }) {
       <Section id="start-install" title={t('安装', 'Install')}>
         <p>
           {t(
-            'OKRamp 是仅支持 ESM 的 TypeScript 库，npm 包名为 okramp。',
-            'OKRamp is an ESM-only TypeScript library published as okramp.',
+            'OKRamp 是仅支持 ESM 的 TypeScript 库，npm 包名为 @okramp/core。',
+            'OKRamp is an ESM-only TypeScript library published as @okramp/core.',
           )}
         </p>
-        <Code language="bash">npm install okramp</Code>
+        <Code language="bash">npm install @okramp/core</Code>
       </Section>
       <Section id="start-first-scale" title={t('生成第一条色阶', 'Generate your first scale')}>
-        <Code>{`import { generateColorScale } from 'okramp';\n\nconst result = generateColorScale('#0052D9');\nconsole.log(result.colors);\nconsole.log(result.colors[result.recommendedIndex]);\nconsole.log(result.diagnostics.messages);`}</Code>
+        <Code>{`import { generateColorScale } from '@okramp/core';\n\nconst result = generateColorScale('#0052D9');\nconsole.log(result.colors);\nconsole.log(result.colors[result.recommendedIndex]);\nconsole.log(result.diagnostics.messages);`}</Code>
         <figure className="guide-scale-example">
           <figcaption>
             {t(
@@ -576,7 +576,7 @@ function TDesignDocument({ t }: { t: Translate }) {
       <Section id="tdesign-boundary" title={t('适配边界', 'Adapter boundary')}>
         <p>
           {t(
-            '核心 npm 包不依赖 TDesign，也不导出 --td-* Token。独立包 okramp-tdesign 负责将 OKRamp 语义角色映射到 TDesign React。',
+            '核心 npm 包不依赖 TDesign，也不导出 --td-* Token。独立包 @okramp/tdesign 负责将 OKRamp 语义角色映射到 TDesign React。',
             'The npm package does not depend on TDesign or export --td-* tokens. The playground adapter maps OKRamp semantic roles to TDesign React.',
           )}
         </p>
@@ -675,7 +675,7 @@ function ApiDocument({ t }: { t: Translate }) {
         </p>
       </Section>
       <Section id="api-types" title={t('类型导入', 'Type imports')}>
-        <Code>{`import type {\n  ColorScaleOptions, ColorScaleResult, ColorStop,\n  ColorThemeOptions, ColorThemeResult, ContrastPolicy,\n  Diagnostics, NeutralScaleOptions, ScaleStrategy, SemanticTheme,\n} from 'okramp';`}</Code>
+        <Code>{`import type {\n  ColorScaleOptions, ColorScaleResult, ColorStop,\n  ColorThemeOptions, ColorThemeResult, ContrastPolicy,\n  Diagnostics, NeutralScaleOptions, ScaleStrategy, SemanticTheme,\n} from '@okramp/core';`}</Code>
         <div className="guide-links">
           <Button
             href="https://github.com/Seeridia/okramp/blob/main/docs/API.md"

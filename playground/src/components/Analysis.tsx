@@ -4,7 +4,7 @@ import { generate as generateAntColors } from '@ant-design/colors';
 import { Color as TDesignColor } from 'tvision-color';
 import { Alert, Card, Select, Table, Tag, Tooltip } from 'tdesign-react';
 import { SearchIcon } from 'tdesign-icons-react';
-import { chooseContrastingForeground, type ColorThemeResult } from 'okramp';
+import { chooseContrastingForeground, type ColorThemeResult } from '@okramp/core';
 import { TOKEN_MAP, toTDesignTheme } from '../adapters/tdesign';
 import { STRATEGIES, type Generated, type Settings } from '../model';
 import { CopyButton, copyText } from './Scales';
@@ -525,7 +525,7 @@ export function Comparison({
   const columns = Math.max(steps, antColors.length);
   const methods = [
     {
-      id: 'okramp',
+      id: '@okramp/core',
       label: 'OKRamp',
       space: 'OKLCH',
       description: t(

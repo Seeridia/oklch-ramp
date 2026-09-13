@@ -13,8 +13,8 @@ export default defineConfig({
   },
   test: {
     alias: {
-      'okramp-tdesign': fileURLToPath(new URL('./packages/tdesign/src/index.ts', import.meta.url)),
-      okramp: fileURLToPath(new URL('./src/index.ts', import.meta.url)),
+      '@okramp/tdesign': fileURLToPath(new URL('./packages/tdesign/src/index.ts', import.meta.url)),
+      '@okramp/core': fileURLToPath(new URL('./src/index.ts', import.meta.url)),
     },
     include: ['tests/**/*.test.ts'],
     environment: 'node',

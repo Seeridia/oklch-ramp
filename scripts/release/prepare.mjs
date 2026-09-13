@@ -38,8 +38,8 @@ async function finalizePr(pr) {
 
 output('publish', 'false');
 const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
-if (pkg.name !== 'okramp' || pkg.private || !/^\d+\.\d+\.\d+$/.test(pkg.version)) {
-  throw new Error('Expected a public stable okramp package.');
+if (pkg.name !== '@okramp/core' || pkg.private || !/^\d+\.\d+\.\d+$/.test(pkg.version)) {
+  throw new Error('Expected a public stable @okramp/core package.');
 }
 const associated = await api(`commits/${sha}/pulls?per_page=100`);
 const releasePr = associated.find(
@@ -136,7 +136,7 @@ git('add', 'package.json', '.release-state.json', 'CHANGELOG.md');
 git('commit', '-m', `chore(release): ${version}`);
 git('push', '--force-with-lease', 'origin', `HEAD:refs/heads/${branch}`);
 const title = `chore(release): ${version}`;
-const body = `This PR updates the package version and changelog for npm publication.\n\nMerge after CI passes. Successful main CI will publish okramp@${version}; no GitHub Release is created.\n\n${notes}`;
+const body = `This PR updates the package version and changelog for npm publication.\n\nMerge after CI passes. Successful main CI will publish @okramp/core@${version}; no GitHub Release is created.\n\n${notes}`;
 const pr = existing
   ? await api(`pulls/${existing.number}`, 'PATCH', { title, body })
   : await api('pulls', 'POST', { title, body, head: branch, base: 'main' });

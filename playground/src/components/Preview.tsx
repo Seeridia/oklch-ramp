@@ -24,7 +24,7 @@ import {
   MoonIcon,
   CloseIcon,
 } from 'tdesign-icons-react';
-import type { ColorThemeResult, SemanticTheme } from 'okramp';
+import type { ColorThemeResult, SemanticTheme } from '@okramp/core';
 import { toTDesignTheme } from '../adapters/tdesign';
 import { AccessibleInput, Field } from './Controls';
 import { readUrlParam, updateUrlParams } from '../url-state';

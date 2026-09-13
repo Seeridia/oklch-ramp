@@ -4,7 +4,7 @@ import {
   generateNeutralScale,
   type ScaleStrategy,
   type ContrastPolicy,
-} from 'okramp';
+} from '@okramp/core';
 import { converter, formatHex, formatRgb } from 'culori';
 
 export type DisplayFormat = 'hex' | 'rgb' | 'oklch';

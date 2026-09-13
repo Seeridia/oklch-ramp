@@ -1,5 +1,5 @@
 {
-  "name": "okramp",
+  "name": "@okramp/core",
   "version": "0.2.0",
   "description": "Perceptual color ramps and themes powered by OKLCH",
   "keywords": [
