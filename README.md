@@ -21,7 +21,7 @@ Perceptual color ramps and themes powered by OKLCH。OKRamp 是一个基于 Type
 pnpm add oklch-ramp
 ```
 
-当前仓库尚未发布到 npm；上面的包名是本项目预留名称。
+已发布到 npm：[oklch-ramp](https://www.npmjs.com/package/oklch-ramp)。当前稳定版本为 `0.1.0`。
 
 ## 快速开始
 
@@ -160,22 +160,22 @@ generateColorScale('#0052D9', { output: 'oklch' });
 
 ## 本地开发
 
-项目使用 VitePlus 0.3：
+项目使用 [Vite+](https://viteplus.dev/guide/) 0.3。安装 Vite+ 后，从仓库根目录执行；先构建 library，生成工作区引用所需的类型声明：
 
 ```bash
 vp install
+vp pack
 vp check
 vp test
 vp run coverage
-vp pack
 vp run benchmark
 ```
 
 ### 交互式演示站
 
-OKRamp 演示站位于 `playground/`，使用 React 19、TDesign React 1.18.3 和 Vite Plus，直接引用工作区中的引擎源码。界面参考 TDesign React Starter 的侧边导航与卡片布局，覆盖三种策略、阶数与锚点、输出格式、色相偏移、中性色染色、明暗主题、对比度策略和诊断。
+OKRamp 演示站位于 `playground/`，使用 React 19、TDesign React 1.18.3 和 Vite+，直接引用工作区中的引擎源码。界面参考 TDesign React Starter 的侧边导航与卡片布局，覆盖三种策略、阶数与锚点、输出格式、色相偏移、中性色染色、明暗主题、对比度策略和诊断。
 
-新增真实 TDesign 组件与项目列表预览、31 个主题变量映射、通用/TDesign 导出，以及浏览器本地方案保存。浅色、深色预览及其浮层独立作用域；核心颜色算法保持不变。详见 [演示站说明](./playground/README.md)。
+提供真实 TDesign 组件与项目列表预览、31 个主题变量映射、通用/TDesign 导出，以及浏览器本地方案保存。浅色、深色预览及其浮层独立作用域。详见 [演示站说明](./playground/README.md)。
 
 从仓库根目录启动：
 
@@ -197,7 +197,6 @@ vp build
 - [详细 API](./docs/API.md)
 - [算法说明](./docs/ALGORITHMS.md)
 - [npm 自动发版与首次配置](./docs/RELEASING.md)
-- [完整实施计划](./IMPLEMENTATION_PLAN.md)
 
 ## 兼容性
 

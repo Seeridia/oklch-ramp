@@ -1,6 +1,6 @@
 # OKRamp Studio
 
-OKRamp 的 React 19 + TDesign React 1.18.3 交互式演示站。参考官方 [TDesign React Starter](https://github.com/Tencent/tdesign-react-starter) 的侧边导航、页头与卡片布局，在现有 VitePlus 工程中实现；没有引入 Starter 的登录、Mock API 和旧版构建配置。
+OKRamp 的 React 19 + TDesign React 1.18.3 交互式演示站。参考官方 [TDesign React Starter](https://github.com/Tencent/tdesign-react-starter) 的侧边导航、页头与卡片布局，使用 Vite+ 构建。
 
 ## 运行
 

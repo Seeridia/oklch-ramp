@@ -12,6 +12,10 @@ npm 包名为 `oklch-ramp`。自动发布由 `.github/workflows/publish.yml` 执
 
 工作流通过官方 `voidzero-dev/setup-vp` 安装 Vite+ 0.3.0 和 Node.js 24，使用 `vp install` 安装依赖、`vp pack` 构建 library、`vp check` 检查、`vp test` 测试。先构建 library 再检查，确保全新检出时 workspace 包的类型声明已存在。底层包管理器仍为 pnpm 11.24.0，`vp pm pack` 转发 tarball 打包命令；`vp pack` 本身是 library 构建命令。npm 11.19.0 专门用于 OIDC 发布，npm 从临时目录发布生成的 tarball，避免项目 `devEngines.packageManager` 限制引发 `EBADDEVENGINES`。`prepack` 会自动构建，防止发布旧产物。
 
+## 发布状态
+
+`oklch-ramp@0.1.0` 已发布到 npm，GitHub 工作流已启用。现有仓库后续发版直接参考「日常发版」；下面保留首次配置步骤，供维护者迁移或重新绑定 Trusted Publisher 时使用。
+
 ## 一次性设置
 
 1. 将源码、锁文件和工作流提交并推送到 `Seeridia/oklch-ramp`。在 Actions 手动运行一次 `Publish to npm` 验证 Linux 环境。

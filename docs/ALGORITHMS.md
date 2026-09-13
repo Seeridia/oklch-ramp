@@ -97,4 +97,4 @@ min(tintStrength, seedC × 0.18) × neutralChromaShape[i]
 - WCAG 2.x 是首版唯一强制模型，APCA 尚未加入；
 - 当前输出基线是 sRGB，不提供原生 Display-P3 色板；
 - 8-bit HEX 量化仍可能在极端输入下产生相邻重复，库会报告但不做随机扰动；
-- 算法预设尚未设置独立版本号，发布稳定版前应补充 `preset: 'v1'` 策略。
+- 算法预设没有独立版本号；需要固定颜色输出时，应锁定 npm 包版本并保留视觉回归样本。
