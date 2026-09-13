@@ -84,7 +84,9 @@ export function App() {
     const value = readUrlParam('page', 'workspace');
     return PAGES.has(value) ? value : 'workspace';
   });
-  const [comparisonSettings, storeComparisonSettings] = useState<Settings>(() => readSettings('compare'));
+  const [comparisonSettings, storeComparisonSettings] = useState<Settings>(() =>
+    readSettings('compare'),
+  );
   const setComparisonSettings = (next: Settings) => {
     storeComparisonSettings(next);
     writeSettings('compare', next);
@@ -165,7 +167,8 @@ export function App() {
     };
   }, [applyToShell, result.theme, uiMode]);
   useEffect(() => {
-    if (page !== 'guide') document.title = `${NAV.find((item) => item.value === page)?.label ?? '色彩工作台'} · OKRamp`;
+    if (page !== 'guide')
+      document.title = `${NAV.find((item) => item.value === page)?.label ?? '色彩工作台'} · OKRamp`;
   }, [page]);
   const messages = result.theme?.diagnostics.messages ?? result.scale.diagnostics.messages;
   const warningCount = messages.filter((m) => m.severity !== 'info').length;
@@ -312,54 +315,58 @@ export function App() {
           </Layout.Header>
           <Layout.Content className="app-content" id="main-content">
             {page !== 'guide' && (
-            <div className="page-heading">
-              <div>
-                <h1>{NAV.find((n) => n.value === page)?.label}</h1>
-                <p>
-                  {page === 'workspace'
-                    ? '从一个主色，构建协调、可用的色彩主题。'
-                    : page === 'compare'
-                      ? '相同的主色，对比不同颜色空间的生成效果。'
-                      : '了解色彩策略，把设计带入代码。'}
-                </p>
+              <div className="page-heading">
+                <div>
+                  <h1>{NAV.find((n) => n.value === page)?.label}</h1>
+                  <p>
+                    {page === 'workspace'
+                      ? '从一个主色，构建协调、可用的色彩主题。'
+                      : page === 'compare'
+                        ? '相同的主色，对比不同颜色空间的生成效果。'
+                        : '了解色彩策略，把设计带入代码。'}
+                  </p>
+                </div>
+                {page !== 'guide' && (
+                  <Space breakLine size={8} className="page-actions">
+                    {page === 'workspace' && (
+                      <Button
+                        className="mobile-settings"
+                        theme="default"
+                        variant="outline"
+                        icon={<SettingIcon aria-hidden="true" />}
+                        onClick={() => setControlsOpen(true)}
+                      >
+                        参数
+                      </Button>
+                    )}
+                    <Button
+                      theme="default"
+                      variant="outline"
+                      icon={<RefreshIcon aria-hidden="true" />}
+                      onClick={() => {
+                        if (page === 'compare') {
+                          setComparisonSettings({ ...DEFAULTS });
+                          return;
+                        }
+                        setSettings({ ...DEFAULTS });
+                        setApplyToShell(true);
+                      }}
+                    >
+                      恢复默认
+                    </Button>
+                    {page === 'workspace' && (
+                      <Button
+                        theme="primary"
+                        icon={<DownloadIcon aria-hidden="true" />}
+                        disabled={Boolean(attempt.error)}
+                        onClick={() => setExportOpen(true)}
+                      >
+                        导出主题
+                      </Button>
+                    )}
+                  </Space>
+                )}
               </div>
-              {page !== 'guide' && (
-                <Space breakLine size={8} className="page-actions">
-                  {page === 'workspace' && <Button
-                    className="mobile-settings"
-                    theme="default"
-                    variant="outline"
-                    icon={<SettingIcon aria-hidden="true" />}
-                    onClick={() => setControlsOpen(true)}
-                  >
-                    参数
-                  </Button>}
-                  <Button
-                    theme="default"
-                    variant="outline"
-                    icon={<RefreshIcon aria-hidden="true" />}
-                    onClick={() => {
-                      if (page === 'compare') {
-                        setComparisonSettings({ ...DEFAULTS });
-                        return;
-                      }
-                      setSettings({ ...DEFAULTS });
-                      setApplyToShell(true);
-                    }}
-                  >
-                    恢复默认
-                  </Button>
-                  {page === 'workspace' && <Button
-                    theme="primary"
-                    icon={<DownloadIcon aria-hidden="true" />}
-                    disabled={Boolean(attempt.error)}
-                    onClick={() => setExportOpen(true)}
-                  >
-                    导出主题
-                  </Button>}
-                </Space>
-              )}
-            </div>
             )}
             {attempt.error && page === 'workspace' && (
               <Alert
@@ -373,13 +380,20 @@ export function App() {
               <Guide />
             ) : (
               <div className={`workspace-grid ${page === 'compare' ? 'compare-workspace' : ''}`}>
-                {page === 'workspace' && <Card className="control-card" bordered={false}>
-                  <Controls settings={settings} onChange={setSettings} error={attempt.error} />
-                </Card>}
+                {page === 'workspace' && (
+                  <Card className="control-card" bordered={false}>
+                    <Controls settings={settings} onChange={setSettings} error={attempt.error} />
+                  </Card>
+                )}
                 <div className="result-area">
                   {page === 'compare' ? (
                     <>
-                      {comparisonAttempt.error && <Alert theme="error" message={`${comparisonAttempt.error} 正在展示上次有效结果。`} />}
+                      {comparisonAttempt.error && (
+                        <Alert
+                          theme="error"
+                          message={`${comparisonAttempt.error} 正在展示上次有效结果。`}
+                        />
+                      )}
                       <Comparison
                         result={comparisonAttempt.result ?? lastComparison}
                         settings={comparisonSettings}

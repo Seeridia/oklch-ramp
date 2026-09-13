@@ -98,8 +98,17 @@ const DOCUMENTS: Array<{
   },
 ];
 
-function Code({ children, language = 'typescript' }: { children: string; language?: 'typescript' | 'bash' }) {
-  const highlighted = useMemo(() => hljs.highlight(children, { language }).value, [children, language]);
+function Code({
+  children,
+  language = 'typescript',
+}: {
+  children: string;
+  language?: 'typescript' | 'bash';
+}) {
+  const highlighted = useMemo(
+    () => hljs.highlight(children, { language }).value,
+    [children, language],
+  );
   return (
     <div className="guide-code">
       <div className="guide-code-toolbar">
@@ -132,7 +141,9 @@ function StartDocument() {
     <>
       <section id="start-install" className="guide-doc-section">
         <h2>安装</h2>
-        <p>OKRamp 是 ESM-only 的 TypeScript Library，npm 包名为 <code>oklch-ramp</code>。</p>
+        <p>
+          OKRamp 是 ESM-only 的 TypeScript Library，npm 包名为 <code>oklch-ramp</code>。
+        </p>
         <Code language="bash">npm install oklch-ramp</Code>
       </section>
       <section id="start-first-scale" className="guide-doc-section">
@@ -148,16 +159,24 @@ console.log(result.diagnostics.messages);`}</Code>
           <figcaption>上述代码的生成结果 · 点击色块复制颜色</figcaption>
           <ScaleStrip result={example} compact />
         </figure>
-        <p><code>colors</code> 是便于直接使用的颜色数组；产品通常还应读取推荐阶位和诊断，而不是假定某个固定数组位置永远代表品牌主色。</p>
+        <p>
+          <code>colors</code>{' '}
+          是便于直接使用的颜色数组；产品通常还应读取推荐阶位和诊断，而不是假定某个固定数组位置永远代表品牌主色。
+        </p>
       </section>
       <section id="start-choose-api" className="guide-doc-section">
         <h2>选择 API</h2>
-        <Definitions items={[
-          ['generateColorScale', '只需要一条按感知明度排列的品牌色阶时使用。'],
-          ['generateNeutralScale', '需要带轻微品牌倾向的中性色阶时使用。'],
-          ['generateColorTheme', '需要品牌色阶、中性色阶和浅色或深色语义角色时使用。'],
-        ]} />
-        <Alert theme="info" message="颜色引擎不依赖 React、TDesign 或 DOM。组件库接入应放在应用适配层。" />
+        <Definitions
+          items={[
+            ['generateColorScale', '只需要一条按感知明度排列的品牌色阶时使用。'],
+            ['generateNeutralScale', '需要带轻微品牌倾向的中性色阶时使用。'],
+            ['generateColorTheme', '需要品牌色阶、中性色阶和浅色或深色语义角色时使用。'],
+          ]}
+        />
+        <Alert
+          theme="info"
+          message="颜色引擎不依赖 React、TDesign 或 DOM。组件库接入应放在应用适配层。"
+        />
       </section>
       <section id="start-runtime" className="guide-doc-section">
         <h2>运行环境</h2>
@@ -177,7 +196,10 @@ function ScalesDocument() {
     <>
       <section id="scales-input" className="guide-doc-section">
         <h2>颜色输入</h2>
-        <p>输入为 Culori 可识别的 CSS 颜色字符串，包括 HEX、RGB、HSL 与 OKLCH。输出是实体不透明色；输入 Alpha 会被忽略并产生诊断。</p>
+        <p>
+          输入为 Culori 可识别的 CSS 颜色字符串，包括 HEX、RGB、HSL 与
+          OKLCH。输出是实体不透明色；输入 Alpha 会被忽略并产生诊断。
+        </p>
         <Code>{`generateColorScale('#0052D9');
 generateColorScale('rgb(0 82 217)');
 generateColorScale('hsl(217 100% 43%)');
@@ -186,23 +208,38 @@ generateColorScale('oklch(0.52 0.22 260)');`}</Code>
       <section id="scales-strategies" className="guide-doc-section">
         <h2>三种策略</h2>
         <div className="guide-strategies">
-          <section><Tag theme="primary" variant="light">tonal · 默认</Tag><p>提取输入色的色相和彩度，重建完整明度曲线。输入色不保证原样出现，适合探索和处理质量不确定的输入。</p></section>
-          <section><Tag variant="light">adaptive-anchor</Tag><p>保留规范化后的输入色，并根据感知明度自动选择锚点。</p></section>
-          <section><Tag variant="light">fixed-anchor</Tag><p>将输入色固定在 anchorIndex。索引从 0 开始，默认 5 表示第 6 阶。</p></section>
+          <section>
+            <Tag theme="primary" variant="light">
+              tonal · 默认
+            </Tag>
+            <p>
+              提取输入色的色相和彩度，重建完整明度曲线。输入色不保证原样出现，适合探索和处理质量不确定的输入。
+            </p>
+          </section>
+          <section>
+            <Tag variant="light">adaptive-anchor</Tag>
+            <p>保留规范化后的输入色，并根据感知明度自动选择锚点。</p>
+          </section>
+          <section>
+            <Tag variant="light">fixed-anchor</Tag>
+            <p>将输入色固定在 anchorIndex。索引从 0 开始，默认 5 表示第 6 阶。</p>
+          </section>
         </div>
       </section>
       <section id="scales-options" className="guide-doc-section">
         <h2>ColorScaleOptions</h2>
-        <Definitions items={[
-          ['steps', '3–20，默认 10。稳定的 v1 视觉预设为 10 阶。'],
-          ['strategy', 'tonal、adaptive-anchor 或 fixed-anchor。'],
-          ['anchorIndex', '仅用于 fixed-anchor，从 0 开始。'],
-          ['output', 'hex、rgb 或 oklch，默认 hex。'],
-          ['gamutMapping', '当前支持 chroma-reduction。'],
-          ['hueShift', '统一色相偏移，或与阶数等长的偏移数组。'],
-          ['lightnessCurve', '严格递减、值域为 0–1、长度等于 steps 的数组。'],
-          ['chromaCurve', '非负的种子彩度倍率数组，长度等于 steps。'],
-        ]} />
+        <Definitions
+          items={[
+            ['steps', '3–20，默认 10。稳定的 v1 视觉预设为 10 阶。'],
+            ['strategy', 'tonal、adaptive-anchor 或 fixed-anchor。'],
+            ['anchorIndex', '仅用于 fixed-anchor，从 0 开始。'],
+            ['output', 'hex、rgb 或 oklch，默认 hex。'],
+            ['gamutMapping', '当前支持 chroma-reduction。'],
+            ['hueShift', '统一色相偏移，或与阶数等长的偏移数组。'],
+            ['lightnessCurve', '严格递减、值域为 0–1、长度等于 steps 的数组。'],
+            ['chromaCurve', '非负的种子彩度倍率数组，长度等于 steps。'],
+          ]}
+        />
       </section>
       <section id="scales-result" className="guide-doc-section">
         <h2>ColorScaleResult</h2>
@@ -220,7 +257,10 @@ result.recommendedIndex;    // 推荐品牌主色位置
 result.colors;              // string[]
 result.stops;               // 每阶详细信息
 result.diagnostics;`}</Code>
-        <p>每个 <code>ColorStop</code> 包含 index、label、color、oklch、inGamut 和 source。source 可用于区分输入色、生成色与经过色域映射的颜色。</p>
+        <p>
+          每个 <code>ColorStop</code> 包含 index、label、color、oklch、inGamut 和 source。source
+          可用于区分输入色、生成色与经过色域映射的颜色。
+        </p>
       </section>
       <section id="scales-curves" className="guide-doc-section">
         <h2>自定义曲线</h2>
@@ -246,12 +286,14 @@ function ThemesDocument() {
   hue: 'seed',
   output: 'hex',
 });`}</Code>
-        <Definitions items={[
-          ['steps', '只能为 10 或 14，默认 14。'],
-          ['tintStrength', '最大 OKLCH 彩度，默认 0.025，上限 0.08。'],
-          ['hue', '使用 seed 色相，或指定一个角度。'],
-          ['lightnessCurve', '自定义中性色明度曲线。'],
-        ]} />
+        <Definitions
+          items={[
+            ['steps', '只能为 10 或 14，默认 14。'],
+            ['tintStrength', '最大 OKLCH 彩度，默认 0.025，上限 0.08。'],
+            ['hue', '使用 seed 色相，或指定一个角度。'],
+            ['lightnessCurve', '自定义中性色明度曲线。'],
+          ]}
+        />
       </section>
       <section id="themes-generate" className="guide-doc-section">
         <h2>生成主题</h2>
@@ -262,25 +304,35 @@ function ThemesDocument() {
   contrast: { normalText: 4.5, nonText: 3 },
   contrastPolicy: 'adjust',
 });`}</Code>
-        <Alert theme="info" message="语义主题要求品牌色阶至少 10 阶，以便为 default、hover、active 等角色分配不同颜色。" />
+        <Alert
+          theme="info"
+          message="语义主题要求品牌色阶至少 10 阶，以便为 default、hover、active 等角色分配不同颜色。"
+        />
       </section>
       <section id="themes-semantic" className="guide-doc-section">
         <h2>语义角色</h2>
-        <Definitions items={[
-          ['brand', 'default、hover、active、disabled、subtle、text、border、focusRing、onBrand 等品牌角色。'],
-          ['background', 'page、container、elevated 和 disabled。'],
-          ['text', 'primary、secondary、placeholder、disabled、inverse、link 和 linkHover。'],
-          ['border', 'default、subtle、strong 和 focus。'],
-        ]} />
+        <Definitions
+          items={[
+            [
+              'brand',
+              'default、hover、active、disabled、subtle、text、border、focusRing、onBrand 等品牌角色。',
+            ],
+            ['background', 'page、container、elevated 和 disabled。'],
+            ['text', 'primary、secondary、placeholder、disabled、inverse、link 和 linkHover。'],
+            ['border', 'default、subtle、strong 和 focus。'],
+          ]}
+        />
         <p>深色主题使用独立映射，不是将浅色色阶倒序。</p>
       </section>
       <section id="themes-contrast" className="guide-doc-section">
         <h2>对比度策略</h2>
-        <Definitions items={[
-          ['report', '保留语义映射并报告对比度结果。'],
-          ['adjust', '从已有色阶选择距离最近且达到目标的颜色。'],
-          ['strict', '仍有失败项时抛出 CONTRAST_TARGET_UNMET。'],
-        ]} />
+        <Definitions
+          items={[
+            ['report', '保留语义映射并报告对比度结果。'],
+            ['adjust', '从已有色阶选择距离最近且达到目标的颜色。'],
+            ['strict', '仍有失败项时抛出 CONTRAST_TARGET_UNMET。'],
+          ]}
+        />
         <p>默认普通文本目标为 4.5:1，重要非文本元素目标为 3:1。</p>
       </section>
       <section id="themes-output" className="guide-doc-section">
@@ -301,7 +353,10 @@ function TDesignDocument() {
     <>
       <section id="tdesign-boundary" className="guide-doc-section">
         <h2>适配边界</h2>
-        <p>核心 npm 包不依赖 TDesign，也不导出 <code>--td-*</code> Token。演示站的 Adapter 将 OKRamp 语义角色映射为 TDesign React 变量。</p>
+        <p>
+          核心 npm 包不依赖 TDesign，也不导出 <code>--td-*</code> Token。演示站的 Adapter 将 OKRamp
+          语义角色映射为 TDesign React 变量。
+        </p>
       </section>
       <section id="tdesign-export" className="guide-doc-section">
         <h2>使用导出文件</h2>
@@ -345,12 +400,21 @@ for (const [name, value] of Object.entries(tokens)) {
 
 // 恢复浅色
 document.documentElement.setAttribute('theme-mode', 'light');`}</Code>
-        <p>同时导出两种模式时，浅色变量位于 :root，深色变量位于 <code>:root[theme-mode="dark"]</code>。</p>
+        <p>
+          同时导出两种模式时，浅色变量位于 :root，深色变量位于 <code>:root[theme-mode="dark"]</code>
+          。
+        </p>
       </section>
       <section id="tdesign-scope" className="guide-doc-section">
         <h2>Token 范围</h2>
-        <p>当前适配覆盖品牌、背景、文字和边框语义，以及组件需要的相关容器变量。成功、警告和错误状态色沿用 TDesign 官方默认值。</p>
-        <Alert theme="warning" message="升级 TDesign 后应重新核对变量名称和组件状态。Adapter 是应用代码，版本应与所用 TDesign 版本一起维护。" />
+        <p>
+          当前适配覆盖品牌、背景、文字和边框语义，以及组件需要的相关容器变量。成功、警告和错误状态色沿用
+          TDesign 官方默认值。
+        </p>
+        <Alert
+          theme="warning"
+          message="升级 TDesign 后应重新核对变量名称和组件状态。Adapter 是应用代码，版本应与所用 TDesign 版本一起维护。"
+        />
       </section>
     </>
   );
@@ -388,7 +452,10 @@ function ApiDocument() {
         <Code>{`relativeLuminance('#0052D9');
 contrastRatio('#ffffff', '#0052D9');
 chooseContrastingForeground('#0052D9');`}</Code>
-        <p>实现基于 WCAG 2.x 的 sRGB 相对亮度。contrastRatio 支持将半透明前景合成到不透明背景；半透明背景会被拒绝。</p>
+        <p>
+          实现基于 WCAG 2.x 的 sRGB 相对亮度。contrastRatio
+          支持将半透明前景合成到不透明背景；半透明背景会被拒绝。
+        </p>
       </section>
       <section id="api-types" className="guide-doc-section">
         <h2>类型导入</h2>
@@ -405,7 +472,13 @@ chooseContrastingForeground('#0052D9');`}</Code>
   SemanticTheme,
 } from 'oklch-ramp';`}</Code>
         <div className="guide-links">
-          <Button href="https://github.com/Seeridia/oklch-ramp/blob/main/docs/API.md" target="_blank" variant="outline">仓库 API 文档</Button>
+          <Button
+            href="https://github.com/Seeridia/oklch-ramp/blob/main/docs/API.md"
+            target="_blank"
+            variant="outline"
+          >
+            仓库 API 文档
+          </Button>
         </div>
       </section>
     </>
@@ -424,16 +497,20 @@ function DiagnosticsDocument() {
 for (const message of result.diagnostics.messages) {
   console.log(message.code, message.severity, message.message);
 }`}</Code>
-        <p>合法但不理想的输入会返回消息，结果仍可使用。每条消息还可能包含 stopIndexes 和 details。</p>
+        <p>
+          合法但不理想的输入会返回消息，结果仍可使用。每条消息还可能包含 stopIndexes 和 details。
+        </p>
       </section>
       <section id="diagnostics-codes" className="guide-doc-section">
         <h2>诊断代码</h2>
-        <Definitions items={[
-          ['输入', 'ALPHA_IGNORED、SEED_TOO_LIGHT、SEED_TOO_DARK、SEED_LOW_CHROMA。'],
-          ['色域', 'SEED_OUT_OF_GAMUT、GAMUT_MAPPED。'],
-          ['色阶', 'DUPLICATE_STOPS、LOW_ADJACENT_DIFFERENCE、ANCHOR_MOVED。'],
-          ['主题', 'CONTRAST_TARGET_UNMET。'],
-        ]} />
+        <Definitions
+          items={[
+            ['输入', 'ALPHA_IGNORED、SEED_TOO_LIGHT、SEED_TOO_DARK、SEED_LOW_CHROMA。'],
+            ['色域', 'SEED_OUT_OF_GAMUT、GAMUT_MAPPED。'],
+            ['色阶', 'DUPLICATE_STOPS、LOW_ADJACENT_DIFFERENCE、ANCHOR_MOVED。'],
+            ['主题', 'CONTRAST_TARGET_UNMET。'],
+          ]}
+        />
       </section>
       <section id="diagnostics-errors" className="guide-doc-section">
         <h2>ColorScaleError</h2>
@@ -448,11 +525,17 @@ for (const message of result.diagnostics.messages) {
       </section>
       <section id="diagnostics-gamut" className="guide-doc-section">
         <h2>色域映射</h2>
-        <p>当前实现保持 OKLCH 明度与色相，通过降低彩度将颜色映射到 sRGB。fixed-anchor 和 adaptive-anchor 保留的是规范化后的 sRGB 输入色。</p>
+        <p>
+          当前实现保持 OKLCH 明度与色相，通过降低彩度将颜色映射到 sRGB。fixed-anchor 和
+          adaptive-anchor 保留的是规范化后的 sRGB 输入色。
+        </p>
       </section>
       <section id="diagnostics-stability" className="guide-doc-section">
         <h2>版本与输出稳定性</h2>
-        <p>算法升级可能改变具体 HEX。需要稳定视觉结果时，请锁定依赖版本，并在产品侧保留关键主题快照或视觉基线。</p>
+        <p>
+          算法升级可能改变具体
+          HEX。需要稳定视觉结果时，请锁定依赖版本，并在产品侧保留关键主题快照或视觉基线。
+        </p>
       </section>
     </>
   );
@@ -503,7 +586,8 @@ export function Guide() {
   }, [currentDocument]);
 
   const selectDocument = (event: MouseEvent<HTMLAnchorElement>, id: GuideId) => {
-    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0)
+      return;
     event.preventDefault();
     setDocumentId(id);
     updateUrlParams({ guideDoc: id === 'start' ? null : id });
@@ -513,7 +597,6 @@ export function Guide() {
     );
   };
 
-
   return (
     <div className="guide-docs-shell">
       <aside className="guide-doc-nav" aria-label="指南文档">
@@ -522,7 +605,12 @@ export function Guide() {
           {DOCUMENTS.map((item) => (
             <a
               key={item.id}
-              href={urlWithParams({ page: 'guide', guideDoc: item.id === 'start' ? null : item.id }).split('#')[0]}
+              href={
+                urlWithParams({
+                  page: 'guide',
+                  guideDoc: item.id === 'start' ? null : item.id,
+                }).split('#')[0]
+              }
               className={item.id === documentId ? 'is-active' : undefined}
               aria-current={item.id === documentId ? 'page' : undefined}
               onClick={(event) => selectDocument(event, item.id)}
@@ -546,10 +634,7 @@ export function Guide() {
         <strong>本篇大纲</strong>
         <nav>
           {currentDocument.sections.map((section) => (
-            <a
-              key={section.id}
-              href={`#${section.id}`}
-            >
+            <a key={section.id} href={`#${section.id}`}>
               {section.label}
             </a>
           ))}

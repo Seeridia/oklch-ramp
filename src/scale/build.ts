@@ -62,7 +62,12 @@ function inspectStops(stops: readonly ColorStop[], kind: 'brand' | 'neutral'): D
       severity: kind === 'neutral' ? 'info' : 'warning',
       message: 'One or more adjacent stops have a small perceptual difference.',
       stopIndexes: [...new Set(lowDifferenceIndexes)],
-      details: { scale: kind, metric: 'OKLab Euclidean distance', threshold: ADJACENT_DIFFERENCE_WARNING, pairs },
+      details: {
+        scale: kind,
+        metric: 'OKLab Euclidean distance',
+        threshold: ADJACENT_DIFFERENCE_WARNING,
+        pairs,
+      },
     });
   }
 

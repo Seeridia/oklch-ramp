@@ -161,8 +161,7 @@ export function Diagnostics({ result }: { result: Generated }) {
     ...(result.theme?.diagnostics.messages ?? []),
   ].filter(
     (item, index, all) =>
-      all.findIndex((other) => JSON.stringify(other) === JSON.stringify(item)) ===
-      index,
+      all.findIndex((other) => JSON.stringify(other) === JSON.stringify(item)) === index,
   );
   const checks = result.theme?.diagnostics.contrastChecks ?? [];
   const failed = checks.filter((check) => !check.passes).length;
@@ -233,24 +232,33 @@ export function Diagnostics({ result }: { result: Generated }) {
                       ? 'warning'
                       : 'info'
                 }
-                title={message.code === 'LOW_ADJACENT_DIFFERENCE' ? '相邻色阶差异较小' : message.code}
+                title={
+                  message.code === 'LOW_ADJACENT_DIFFERENCE' ? '相邻色阶差异较小' : message.code
+                }
                 message={
                   <div>
                     {message.code === 'LOW_ADJACENT_DIFFERENCE' ? (
                       <>
-                        <p>{message.details?.scale === 'neutral'
-                          ? '中性色的细微差异可用于背景层次，此提示不代表生成失败。'
-                          : '品牌色阶部分颜色较接近，可尝试减少阶数或调整锚点。'}</p>
-                        {Array.isArray(message.details?.pairs) && message.details.pairs.map(
-                          (pair: { from: number; to: number; distance: number }) => (
-                            <p key={`${pair.from}-${pair.to}`}>
-                              {message.details?.scale === 'neutral' ? '中性色' : '品牌色'}第 {pair.from + 1}–{pair.to + 1} 阶：
-                              OKLab 色差 {pair.distance.toFixed(4)}（提示阈值 {String(message.details?.threshold)}）
-                            </p>
-                          ),
-                        )}
+                        <p>
+                          {message.details?.scale === 'neutral'
+                            ? '中性色的细微差异可用于背景层次，此提示不代表生成失败。'
+                            : '品牌色阶部分颜色较接近，可尝试减少阶数或调整锚点。'}
+                        </p>
+                        {Array.isArray(message.details?.pairs) &&
+                          message.details.pairs.map(
+                            (pair: { from: number; to: number; distance: number }) => (
+                              <p key={`${pair.from}-${pair.to}`}>
+                                {message.details?.scale === 'neutral' ? '中性色' : '品牌色'}第{' '}
+                                {pair.from + 1}–{pair.to + 1} 阶： OKLab 色差{' '}
+                                {pair.distance.toFixed(4)}（提示阈值{' '}
+                                {String(message.details?.threshold)}）
+                              </p>
+                            ),
+                          )}
                       </>
-                    ) : message.message}
+                    ) : (
+                      message.message
+                    )}
                     {message.details && message.code !== 'LOW_ADJACENT_DIFFERENCE' && (
                       <pre className="diagnostic-details">
                         {JSON.stringify(message.details, null, 2)}
@@ -281,12 +289,25 @@ function interpolatedScale(seed: string, mode: 'hsl' | 'rgb' | 'lab', steps: num
   });
 }
 
-function ComparisonRamp({ colors, anchor, recommended, columns, seed }: {
-  colors: string[]; anchor?: number; recommended?: number; columns: number; seed: string;
+function ComparisonRamp({
+  colors,
+  anchor,
+  recommended,
+  columns,
+  seed,
+}: {
+  colors: string[];
+  anchor?: number;
+  recommended?: number;
+  columns: number;
+  seed: string;
 }) {
   const toOklch = converter('oklch');
   return (
-    <div className="comparison-ramp" style={{ gridTemplateColumns: `repeat(${columns}, minmax(28px, 1fr))` }}>
+    <div
+      className="comparison-ramp"
+      style={{ gridTemplateColumns: `repeat(${columns}, minmax(28px, 1fr))` }}
+    >
       {colors.map((color, index) => {
         const isAnchor = index === anchor;
         const isRecommended = index === recommended;
@@ -307,13 +328,20 @@ function ComparisonRamp({ colors, anchor, recommended, columns, seed }: {
         );
       })}
       {Array.from({ length: columns - colors.length }, (_, index) => (
-        <span key={`empty-${index}`} className="comparison-empty" aria-label="无此阶颜色">—</span>
+        <span key={`empty-${index}`} className="comparison-empty" aria-label="无此阶颜色">
+          —
+        </span>
       ))}
     </div>
   );
 }
 
-export function Comparison({ result, settings, onChange, error }: {
+export function Comparison({
+  result,
+  settings,
+  onChange,
+  error,
+}: {
   result: Pick<Generated, 'scale' | 'settings'>;
   settings: Settings;
   onChange: (settings: Settings) => void;
@@ -359,7 +387,8 @@ export function Comparison({ result, settings, onChange, error }: {
       id: 'ant-design',
       label: 'Ant Design',
       space: 'HSV',
-      description: '使用官方 @ant-design/colors 浅色色板算法，固定生成 10 阶，输入主色位于第 6 阶。',
+      description:
+        '使用官方 @ant-design/colors 浅色色板算法，固定生成 10 阶，输入主色位于第 6 阶。',
       colors: antColors,
       anchor: 5,
       lightness: 'HSV Value 步进',
@@ -410,7 +439,13 @@ export function Comparison({ result, settings, onChange, error }: {
         message="各方案使用同一输入主色，固定生成 10 阶。策略与锚点仅影响 OKRamp；按阶号对齐不代表相同感知明度。A 表示输入色锚点，R 表示推荐主色；重合时显示 A。悬停或聚焦查看颜色明度，点击复制。"
       />
       <Card bordered={false} className="comparison-controls">
-        <SeedColorControl settings={settings} onChange={onChange} error={error} inputId="comparison-seed" inline />
+        <SeedColorControl
+          settings={settings}
+          onChange={onChange}
+          error={error}
+          inputId="comparison-seed"
+          inline
+        />
       </Card>
       <div className="comparison-grid">
         {methods.map((method) => (
@@ -430,7 +465,9 @@ export function Comparison({ result, settings, onChange, error }: {
                       aria-label="OKRamp 生成策略"
                       value={settings.strategy}
                       options={STRATEGIES.map(({ value, label }) => ({ value, label }))}
-                      onChange={(value) => onChange({ ...settings, strategy: value as Settings['strategy'] })}
+                      onChange={(value) =>
+                        onChange({ ...settings, strategy: value as Settings['strategy'] })
+                      }
                     />
                   </Field>
                   {settings.strategy === 'fixed-anchor' && (
@@ -438,7 +475,10 @@ export function Comparison({ result, settings, onChange, error }: {
                       <Select
                         aria-label="OKRamp 输入色锚点"
                         value={settings.anchorIndex}
-                        options={Array.from({ length: 10 }, (_, index) => ({ value: index, label: `第 ${index + 1} 阶` }))}
+                        options={Array.from({ length: 10 }, (_, index) => ({
+                          value: index,
+                          label: `第 ${index + 1} 阶`,
+                        }))}
                         onChange={(value) => onChange({ ...settings, anchorIndex: Number(value) })}
                       />
                     </Field>
@@ -446,13 +486,24 @@ export function Comparison({ result, settings, onChange, error }: {
                 </section>
               )}
               {method.source && (
-                <a className="comparison-source" href={method.source} target="_blank" rel="noreferrer">
+                <a
+                  className="comparison-source"
+                  href={method.source}
+                  target="_blank"
+                  rel="noreferrer"
+                >
                   {method.sourceLabel}
                 </a>
               )}
             </div>
             <div className="comparison-content">
-              <ComparisonRamp colors={method.colors} anchor={method.anchor} recommended={method.recommended} columns={columns} seed={seed} />
+              <ComparisonRamp
+                colors={method.colors}
+                anchor={method.anchor}
+                recommended={method.recommended}
+                columns={columns}
+                seed={seed}
+              />
               <div className="comparison-scale-labels">
                 <span>浅色端</span>
                 <span>{method.colors.length} 阶 · A 输入色 / R 推荐色</span>
@@ -474,7 +525,9 @@ export function Comparison({ result, settings, onChange, error }: {
               </div>
               <div>
                 <span>色域处理</span>
-                <strong>{method.gamut ?? (method.primary ? '映射至 sRGB' : 'HEX 输出裁剪至 sRGB')}</strong>
+                <strong>
+                  {method.gamut ?? (method.primary ? '映射至 sRGB' : 'HEX 输出裁剪至 sRGB')}
+                </strong>
               </div>
             </div>
           </Card>

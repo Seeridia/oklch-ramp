@@ -40,7 +40,8 @@ export function ScaleStrip({
 }) {
   const stripRef = useRef<HTMLDivElement>(null);
   const [overflowing, setOverflowing] = useState(false);
-  const activeIndex = selected === undefined ? undefined : Math.min(selected, result.stops.length - 1);
+  const activeIndex =
+    selected === undefined ? undefined : Math.min(selected, result.stops.length - 1);
   useEffect(() => {
     const strip = stripRef.current;
     if (!strip) return;
@@ -52,7 +53,8 @@ export function ScaleStrip({
       const bounds = strip.getBoundingClientRect();
       const selectedBounds = button.getBoundingClientRect();
       if (selectedBounds.left < bounds.left) strip.scrollLeft += selectedBounds.left - bounds.left;
-      else if (selectedBounds.right > bounds.right) strip.scrollLeft += selectedBounds.right - bounds.right;
+      else if (selectedBounds.right > bounds.right)
+        strip.scrollLeft += selectedBounds.right - bounds.right;
     };
     const observer = new ResizeObserver(revealSelection);
     observer.observe(strip);
@@ -90,7 +92,9 @@ export function ScaleStrip({
             ) : result.recommendedIndex === stop.index ? (
               <span className="stop-marker">R</span>
             ) : null}
-            {activeIndex === stop.index && <CheckIcon className="selected-check" aria-hidden="true" />}
+            {activeIndex === stop.index && (
+              <CheckIcon className="selected-check" aria-hidden="true" />
+            )}
           </span>
           {!compact && (
             <span className="stop-meta">

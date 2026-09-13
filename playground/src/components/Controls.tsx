@@ -81,7 +81,7 @@ export function Controls({
       </div>
       <SeedColorControl settings={settings} onChange={onChange} error={error} />
       <Divider />
-      <Field label={comparison ? "OKRamp 策略" : "生成策略"}>
+      <Field label={comparison ? 'OKRamp 策略' : '生成策略'}>
         <Select
           aria-label="生成策略"
           value={settings.strategy}
@@ -94,27 +94,30 @@ export function Controls({
       </Field>
       {!comparison && (
         <>
-      <Field label="品牌色阶" hint="3 – 20 阶">
-        <InputNumber
-          aria-label="品牌色阶数"
-          value={settings.steps}
-          min={3}
-          max={20}
-          decimalPlaces={0}
-          theme="row"
-          onChange={(value) => {
-            if (typeof value === 'number')
-              onChange({
-                ...settings,
-                steps: value,
-                anchorIndex: Math.min(settings.anchorIndex, value - (settings.endpoints === 'black-white' ? 2 : 1)),
-              });
-          }}
-        />
-      </Field>
-      {settings.steps < 10 && (
-        <p className="field-hint">当前为色阶模式。生成主题需要至少 10 阶。</p>
-      )}
+          <Field label="品牌色阶" hint="3 – 20 阶">
+            <InputNumber
+              aria-label="品牌色阶数"
+              value={settings.steps}
+              min={3}
+              max={20}
+              decimalPlaces={0}
+              theme="row"
+              onChange={(value) => {
+                if (typeof value === 'number')
+                  onChange({
+                    ...settings,
+                    steps: value,
+                    anchorIndex: Math.min(
+                      settings.anchorIndex,
+                      value - (settings.endpoints === 'black-white' ? 2 : 1),
+                    ),
+                  });
+              }}
+            />
+          </Field>
+          {settings.steps < 10 && (
+            <p className="field-hint">当前为色阶模式。生成主题需要至少 10 阶。</p>
+          )}
         </>
       )}
       {settings.strategy === 'fixed-anchor' && (
@@ -125,7 +128,9 @@ export function Controls({
             options={Array.from({ length: settings.steps }, (_, index) => ({
               label: `第 ${index + 1} 阶`,
               value: index,
-              disabled: settings.endpoints === 'black-white' && (index === 0 || index === settings.steps - 1),
+              disabled:
+                settings.endpoints === 'black-white' &&
+                (index === 0 || index === settings.steps - 1),
             }))}
             onChange={(value) => update('anchorIndex', Number(value))}
           />
@@ -133,138 +138,151 @@ export function Controls({
       )}
       {!comparison && (
         <>
-      <Field label="中性色阶">
-        <Radio.Group
-          aria-label="中性色阶"
-          theme="button"
-          variant="default-filled"
-          value={settings.neutralSteps}
-          onChange={(value) => update('neutralSteps', Number(value) as 10 | 14)}
-          options={[
-            { label: '10 阶', value: 10 },
-            { label: '14 阶', value: 14 },
-          ]}
-        />
-      </Field>
-      <Field label="对比度策略">
-        <Select
-          aria-label="对比度策略"
-          value={settings.contrastPolicy}
-          options={[
-            { label: '仅报告', value: 'report' },
-            { label: '自动调整', value: 'adjust' },
-            { label: '严格校验', value: 'strict' },
-          ]}
-          onChange={(value) => update('contrastPolicy', value as Settings['contrastPolicy'])}
-        />
-      </Field>
-      <Collapse className="advanced-settings" borderless expandIconPlacement="right">
-        <Collapse.Panel
-          value="advanced"
-          header={`高级设置${advancedCount ? ` · ${advancedCount} 项已调整` : ''}`}
-        >
-          <Field label="端点方式">
-            <Select
-              aria-label="端点方式"
-              value={settings.endpoints}
+          <Field label="中性色阶">
+            <Radio.Group
+              aria-label="中性色阶"
+              theme="button"
+              variant="default-filled"
+              value={settings.neutralSteps}
+              onChange={(value) => update('neutralSteps', Number(value) as 10 | 14)}
               options={[
-                { label: '曲线端点', value: 'curve' },
-                { label: '纯白 / 纯黑', value: 'black-white' },
+                { label: '10 阶', value: 10 },
+                { label: '14 阶', value: 14 },
               ]}
-              onChange={(value) => onChange({
-                ...settings,
-                endpoints: value as Settings['endpoints'],
-                anchorIndex: value === 'black-white'
-                  ? Math.max(1, Math.min(settings.anchorIndex, settings.steps - 2))
-                  : settings.anchorIndex,
-              })}
             />
           </Field>
-          <Field label="色相偏移" hint="°">
-            <div className="advanced-slider-row">
-            <Slider
-              aria-label="色相偏移"
-              value={settings.hueShift}
-              min={-60}
-              max={60}
-              onChange={(value) => update('hueShift', Number(value))}
-            />
-            <InputNumber
-              aria-label="色相偏移"
-              value={settings.hueShift}
-              min={-60}
-              max={60}
-              onChange={(value) => {
-                if (typeof value === 'number') update('hueShift', value);
-              }}
-            />
-            </div>
-          </Field>
-          <Field label="中性色染色">
-            <div className="advanced-slider-row">
-            <Slider
-              aria-label="中性色染色"
-              value={settings.tintStrength}
-              min={0}
-              max={0.08}
-              step={0.001}
-              onChange={(value) => update('tintStrength', Number(value))}
-            />
-            <InputNumber
-              aria-label="中性色染色"
-              value={settings.tintStrength}
-              min={0}
-              max={0.08}
-              step={0.001}
-              decimalPlaces={3}
-              onChange={(value) => {
-                if (typeof value === 'number') update('tintStrength', value);
-              }}
-            />
-            </div>
-          </Field>
-          <div className="advanced-contrast-group">
-          <Field label="普通文本目标" hint="对比度">
-            <InputNumber
-              aria-label="普通文本对比度目标"
-              value={settings.normalText}
-              min={1}
-              max={21}
-              step={0.5}
-              onChange={(value) => {
-                if (typeof value === 'number') update('normalText', value);
-              }}
+          <Field label="对比度策略">
+            <Select
+              aria-label="对比度策略"
+              value={settings.contrastPolicy}
+              options={[
+                { label: '仅报告', value: 'report' },
+                { label: '自动调整', value: 'adjust' },
+                { label: '严格校验', value: 'strict' },
+              ]}
+              onChange={(value) => update('contrastPolicy', value as Settings['contrastPolicy'])}
             />
           </Field>
-          <Field label="非文本目标" hint="对比度">
-            <InputNumber
-              aria-label="非文本对比度目标"
-              value={settings.nonText}
-              min={1}
-              max={21}
-              step={0.5}
-              onChange={(value) => {
-                if (typeof value === 'number') update('nonText', value);
-              }}
-            />
-          </Field>
-          </div>
-        </Collapse.Panel>
-      </Collapse>
+          <Collapse className="advanced-settings" borderless expandIconPlacement="right">
+            <Collapse.Panel
+              value="advanced"
+              header={`高级设置${advancedCount ? ` · ${advancedCount} 项已调整` : ''}`}
+            >
+              <Field label="端点方式">
+                <Select
+                  aria-label="端点方式"
+                  value={settings.endpoints}
+                  options={[
+                    { label: '曲线端点', value: 'curve' },
+                    { label: '纯白 / 纯黑', value: 'black-white' },
+                  ]}
+                  onChange={(value) =>
+                    onChange({
+                      ...settings,
+                      endpoints: value as Settings['endpoints'],
+                      anchorIndex:
+                        value === 'black-white'
+                          ? Math.max(1, Math.min(settings.anchorIndex, settings.steps - 2))
+                          : settings.anchorIndex,
+                    })
+                  }
+                />
+              </Field>
+              <Field label="色相偏移" hint="°">
+                <div className="advanced-slider-row">
+                  <Slider
+                    aria-label="色相偏移"
+                    value={settings.hueShift}
+                    min={-60}
+                    max={60}
+                    onChange={(value) => update('hueShift', Number(value))}
+                  />
+                  <InputNumber
+                    aria-label="色相偏移"
+                    value={settings.hueShift}
+                    min={-60}
+                    max={60}
+                    onChange={(value) => {
+                      if (typeof value === 'number') update('hueShift', value);
+                    }}
+                  />
+                </div>
+              </Field>
+              <Field label="中性色染色">
+                <div className="advanced-slider-row">
+                  <Slider
+                    aria-label="中性色染色"
+                    value={settings.tintStrength}
+                    min={0}
+                    max={0.08}
+                    step={0.001}
+                    onChange={(value) => update('tintStrength', Number(value))}
+                  />
+                  <InputNumber
+                    aria-label="中性色染色"
+                    value={settings.tintStrength}
+                    min={0}
+                    max={0.08}
+                    step={0.001}
+                    decimalPlaces={3}
+                    onChange={(value) => {
+                      if (typeof value === 'number') update('tintStrength', value);
+                    }}
+                  />
+                </div>
+              </Field>
+              <div className="advanced-contrast-group">
+                <Field label="普通文本目标" hint="对比度">
+                  <InputNumber
+                    aria-label="普通文本对比度目标"
+                    value={settings.normalText}
+                    min={1}
+                    max={21}
+                    step={0.5}
+                    onChange={(value) => {
+                      if (typeof value === 'number') update('normalText', value);
+                    }}
+                  />
+                </Field>
+                <Field label="非文本目标" hint="对比度">
+                  <InputNumber
+                    aria-label="非文本对比度目标"
+                    value={settings.nonText}
+                    min={1}
+                    max={21}
+                    step={0.5}
+                    onChange={(value) => {
+                      if (typeof value === 'number') update('nonText', value);
+                    }}
+                  />
+                </Field>
+              </div>
+            </Collapse.Panel>
+          </Collapse>
         </>
       )}
       <div className="panel-note">
         {comparison ? (
           <>各方案固定 10 阶；策略与锚点仅影响 OKRamp。</>
         ) : (
-          <>基于 OKLCH 感知色彩空间<br />输出颜色均映射至 sRGB 色域</>
+          <>
+            基于 OKLCH 感知色彩空间
+            <br />
+            输出颜色均映射至 sRGB 色域
+          </>
         )}
       </div>
     </div>
   );
 }
 
-export function SeedColorControl({ settings, onChange, error, inputId = 'seed-color', inline = false }: {
+export function SeedColorControl({
+  settings,
+  onChange,
+  error,
+  inputId = 'seed-color',
+  inline = false,
+}: {
   settings: Settings;
   onChange: (settings: Settings) => void;
   error: string;
