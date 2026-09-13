@@ -42,11 +42,11 @@
   "scripts": {
     "benchmark": "vp pack && node scripts/benchmark.mjs",
     "build": "vp pack",
-    "prepack": "pnpm build",
+    "prepack": "vp pack",
     "check": "vp check",
     "coverage": "vp test run --coverage",
-    "demo": "pnpm --dir playground dev",
-    "demo:build": "pnpm --dir playground build",
+    "demo": "vp -C playground dev",
+    "demo:build": "vp -C playground build",
     "test": "vp test"
   },
   "dependencies": {

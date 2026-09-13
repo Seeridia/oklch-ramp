@@ -7,11 +7,12 @@ OKRamp 的 React 19 + TDesign React 1.18.3 交互式演示站。参考官方 [TD
 从仓库根目录：
 
 ```sh
-pnpm install
-pnpm demo
-pnpm demo:build
-pnpm --dir playground check
-pnpm test
+vp install
+vp pack
+vp run demo
+vp run demo:build
+vp -C playground check
+vp test
 ```
 
 本地地址默认是 `http://127.0.0.1:4173/`。
@@ -37,8 +38,8 @@ pnpm test
 升级 TDesign 后执行并复核：
 
 ```sh
-pnpm --dir playground sync:themes
-pnpm test
+vp -C playground run sync:themes
+vp test
 ```
 
 导出 CSS 在 `tdesign-react/dist/tdesign.css` 后加载。使用 `document.documentElement.setAttribute('theme-mode', 'dark')` 切换深色模式。

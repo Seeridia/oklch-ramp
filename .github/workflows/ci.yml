@@ -18,18 +18,16 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: voidzero-dev/setup-vp@v1
         with:
+          version: 0.3.0
           node-version: 24
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 11.24.0
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm run check
-      - run: pnpm test
-      - run: pnpm demo:build
-      - run: pnpm pack --out "${RUNNER_TEMP}/oklch-ramp.tgz"
+          cache: true
+          run-install: false
+      - run: vp install --frozen-lockfile
+      # Workspace types resolve through dist/index.d.mts on a fresh checkout.
+      - run: vp pack
+      - run: vp check
+      - run: vp test
+      - run: vp run demo:build
+      - run: vp pm pack --out "${RUNNER_TEMP}/oklch-ramp.tgz"

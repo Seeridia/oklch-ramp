@@ -10,7 +10,7 @@ npm 包名为 `oklch-ramp`。自动发布由 `.github/workflows/publish.yml` 执
 - 正式版发布到 `latest`；包含 `-` 的预发布版本发布到 `next`，且 GitHub Release 必须勾选预发布。
 - 标签必须精确匹配根 `package.json`，例如版本 `0.1.1` 对应 `v0.1.1`。
 
-工作流使用 Node.js 24、pnpm 11.24.0 和 npm 11.19.0。pnpm 负责安装与打包，npm 从临时目录发布生成的 tarball，避免项目 `devEngines.packageManager` 限制引发 `EBADDEVENGINES`。`prepack` 会自动构建，防止发布旧产物。
+工作流通过官方 `voidzero-dev/setup-vp` 安装 Vite+ 0.3.0 和 Node.js 24，使用 `vp install` 安装依赖、`vp pack` 构建 library、`vp check` 检查、`vp test` 测试。先构建 library 再检查，确保全新检出时 workspace 包的类型声明已存在。底层包管理器仍为 pnpm 11.24.0，`vp pm pack` 转发 tarball 打包命令；`vp pack` 本身是 library 构建命令。npm 11.19.0 专门用于 OIDC 发布，npm 从临时目录发布生成的 tarball，避免项目 `devEngines.packageManager` 限制引发 `EBADDEVENGINES`。`prepack` 会自动构建，防止发布旧产物。
 
 ## 一次性设置
 
@@ -21,9 +21,10 @@ npm 包名为 `oklch-ramp`。自动发布由 `.github/workflows/publish.yml` 执
    cd /tmp
    npm login --registry=https://registry.npmjs.org/
    cd /Users/seeridia/Documents/色阶
-   pnpm run check
-   pnpm test
-   pnpm pack --out /tmp/oklch-ramp-initial.tgz
+   vp pack
+   vp check
+   vp test
+   vp pm pack --out /tmp/oklch-ramp-initial.tgz
    cd /tmp
    npm publish ./oklch-ramp-initial.tgz --ignore-scripts --access public --registry=https://registry.npmjs.org/
    ```

@@ -180,16 +180,16 @@ OKRamp 演示站位于 `playground/`，使用 React 19、TDesign React 1.18.3 �
 从仓库根目录启动：
 
 ```bash
-pnpm demo
+vp run demo
 ```
 
 也可以独立运行：
 
 ```bash
 cd playground
-pnpm dev
-pnpm check
-pnpm build
+vp dev
+vp check
+vp build
 ```
 
 ## 文档
