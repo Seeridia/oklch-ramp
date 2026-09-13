@@ -3,10 +3,7 @@
     "id": "getting-started/overview",
     "file": "getting-started-overview",
     "group": "getting-started",
-    "title": [
-      "安装与快速开始",
-      "Installation and quick start"
-    ],
+    "title": ["安装与快速开始", "Installation and quick start"],
     "description": [
       "安装核心包、生成第一条色阶，并选择适合项目的 API。",
       "Install core, generate your first scale, and choose an API."
@@ -16,10 +13,7 @@
     "id": "core/scales",
     "file": "core-scales",
     "group": "core",
-    "title": [
-      "色阶生成与配置",
-      "Scale generation and configuration"
-    ],
+    "title": ["色阶生成与配置", "Scale generation and configuration"],
     "description": [
       "颜色输入、生成策略、自定义曲线和返回结果。",
       "Color inputs, strategies, custom curves, and results."
@@ -29,10 +23,7 @@
     "id": "principles/generation",
     "file": "principles-generation",
     "group": "principles",
-    "title": [
-      "颜色空间与生成流程",
-      "Color space and generation"
-    ],
+    "title": ["颜色空间与生成流程", "Color space and generation"],
     "description": [
       "理解 OKLCH、默认曲线和三种生成策略如何共同工作。",
       "Understand OKLCH, default curves, and the three generation strategies."
@@ -42,10 +33,7 @@
     "id": "principles/quality",
     "file": "principles-quality",
     "group": "principles",
-    "title": [
-      "色域、主题与质量边界",
-      "Gamut, themes, and quality"
-    ],
+    "title": ["色域、主题与质量边界", "Gamut, themes, and quality"],
     "description": [
       "理解色域映射、中性色、语义角色及算法的边界。",
       "Understand gamut mapping, neutrals, semantic roles, and algorithm limits."
@@ -55,10 +43,7 @@
     "id": "themes/semantic",
     "file": "themes-semantic",
     "group": "themes",
-    "title": [
-      "中性色与语义主题",
-      "Neutrals and semantic themes"
-    ],
+    "title": ["中性色与语义主题", "Neutrals and semantic themes"],
     "description": [
       "从品牌色生成明暗主题，配置中性色和对比度策略。",
       "Generate light and dark themes with neutrals and contrast policies."
@@ -68,10 +53,7 @@
     "id": "integrations/tdesign",
     "file": "integrations-tdesign",
     "group": "integrations",
-    "title": [
-      "TDesign",
-      "TDesign"
-    ],
+    "title": ["TDesign", "TDesign"],
     "description": [
       "TDesign 的安装接入、主题切换、API 与颜色映射规则。",
       "Installation, theme switching, APIs, and color mappings for TDesign."
@@ -81,10 +63,7 @@
     "id": "integrations/antd",
     "file": "integrations-antd",
     "group": "integrations",
-    "title": [
-      "Ant Design",
-      "Ant Design"
-    ],
+    "title": ["Ant Design", "Ant Design"],
     "description": [
       "Ant Design 的安装接入、主题切换、API 与颜色映射规则。",
       "Installation, theme switching, APIs, and color mappings for Ant Design."
@@ -94,10 +73,7 @@
     "id": "integrations/shadcn",
     "file": "integrations-shadcn",
     "group": "integrations",
-    "title": [
-      "shadcn/ui",
-      "shadcn/ui"
-    ],
+    "title": ["shadcn/ui", "shadcn/ui"],
     "description": [
       "shadcn/ui 的安装接入、主题切换、API 与颜色映射规则。",
       "Installation, theme switching, APIs, and color mappings for shadcn/ui."
@@ -107,10 +83,7 @@
     "id": "reference/api",
     "file": "reference-api",
     "group": "reference",
-    "title": [
-      "核心 API 参考",
-      "Core API reference"
-    ],
+    "title": ["核心 API 参考", "Core API reference"],
     "description": [
       "色阶、中性色、语义主题、对比度工具及类型导入。",
       "Scales, neutrals, semantic themes, contrast utilities, and type imports."
@@ -120,10 +93,7 @@
     "id": "reference/diagnostics",
     "file": "reference-diagnostics",
     "group": "reference",
-    "title": [
-      "诊断与错误处理",
-      "Diagnostics and errors"
-    ],
+    "title": ["诊断与错误处理", "Diagnostics and errors"],
     "description": [
       "读取诊断、处理错误，了解色域映射与版本稳定性。",
       "Read diagnostics, handle errors, and understand gamut mapping and version stability."

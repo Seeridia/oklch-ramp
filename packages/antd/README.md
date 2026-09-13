@@ -48,10 +48,10 @@ const config = {
 
 ## API
 
-| 函数 | 返回值 |
-| --- | --- |
+| 函数                                      | 返回值                                                    |
+| ----------------------------------------- | --------------------------------------------------------- |
 | `createAntdTheme(result, mode = 'light')` | `{ algorithm: false, token }`，请求未生成的模式时抛出错误 |
-| `createAntdTokens(semanticTheme)` | 颜色别名到颜色值的对象 |
+| `createAntdTokens(semanticTheme)`         | 颜色别名到颜色值的对象                                    |
 
 直接使用 `createAntdTokens` 时，也应将 `algorithm` 设置为 `false`。
 

@@ -3,7 +3,12 @@ import { Text } from '../Blocks';
 
 ## <Text zh="安装适配器" en="Install the adapter" />
 
-<DocParagraph><Text zh="在已有 shadcn/ui 项目中添加核心包和适配器，保留组件源代码和现有 Tailwind 配置。" en="Add core and the adapter to an existing shadcn/ui project. Preserve component source and Tailwind configuration." /></DocParagraph>
+<DocParagraph>
+  <Text
+    zh="在已有 shadcn/ui 项目中添加核心包和适配器，保留组件源代码和现有 Tailwind 配置。"
+    en="Add core and the adapter to an existing shadcn/ui project. Preserve component source and Tailwind configuration."
+  />
+</DocParagraph>
 
 ```bash
 npm install @okramp/core @okramp/shadcn
@@ -11,21 +16,32 @@ npm install @okramp/core @okramp/shadcn
 
 ## <Text zh="生成主题文件" en="Generate a theme file" />
 
-<DocParagraph><Text zh="保存输出为 okramp-theme.css，在现有主题变量之后加载。变量包含完整 CSS 颜色值和底层色阶引用。" en="Save output as okramp-theme.css and load it after existing theme variables. Variables contain full CSS colors and primitive references." /></DocParagraph>
+<DocParagraph>
+  <Text
+    zh="保存输出为 okramp-theme.css，在现有主题变量之后加载。变量包含完整 CSS 颜色值和底层色阶引用。"
+    en="Save output as okramp-theme.css and load it after existing theme variables. Variables contain full CSS colors and primitive references."
+  />
+</DocParagraph>
 
 ```ts
 import { generateColorTheme } from '@okramp/core';
 import { createShadcnCss } from '@okramp/shadcn';
 
 const colors = generateColorTheme('#0052D9', {
-  mode: 'both', contrastPolicy: 'adjust',
+  mode: 'both',
+  contrastPolicy: 'adjust',
 });
 const css = createShadcnCss(colors);
 ```
 
 ## <Text zh="保留 Tailwind 映射" en="Preserve Tailwind mappings" />
 
-<DocParagraph><Text zh="保留现有 @theme inline 映射，将变量直接作为颜色使用。不要删除项目的 destructive、chart、radius 等声明。" en="Preserve existing @theme inline mappings and use variables directly as colors. Keep destructive, chart and radius declarations." /></DocParagraph>
+<DocParagraph>
+  <Text
+    zh="保留现有 @theme inline 映射，将变量直接作为颜色使用。不要删除项目的 destructive、chart、radius 等声明。"
+    en="Preserve existing @theme inline mappings and use variables directly as colors. Keep destructive, chart and radius declarations."
+  />
+</DocParagraph>
 
 ```css
 @theme inline {
@@ -38,7 +54,12 @@ const css = createShadcnCss(colors);
 
 ## <Text zh="切换深色模式" en="Switch dark mode" />
 
-<DocParagraph><Text zh="导出选择器为 :root 与 .dark。已有主题管理器时继续使用它管理 dark 类，避免两个切换逻辑互相覆盖。" en="Selectors are :root and .dark. If a theme manager already exists, let it manage the dark class to avoid conflicting controls." /></DocParagraph>
+<DocParagraph>
+  <Text
+    zh="导出选择器为 :root 与 .dark。已有主题管理器时继续使用它管理 dark 类，避免两个切换逻辑互相覆盖。"
+    en="Selectors are :root and .dark. If a theme manager already exists, let it manage the dark class to avoid conflicting controls."
+  />
+</DocParagraph>
 
 ```ts
 document.documentElement.classList.toggle('dark', true);
@@ -46,7 +67,12 @@ document.documentElement.classList.toggle('dark', true);
 
 ## <Text zh="旧版 HSL 项目" en="Legacy HSL projects" />
 
-<DocParagraph><Text zh="旧项目的 hsl(var(--primary)) 需要改为 var(--primary)，因为导出值已是完整颜色。若旧 Tailwind 配置也使用 hsl 包装，需要同步修改。" en="Replace legacy hsl(var(--primary)) with var(--primary): exported values are full colors. Update HSL wrappers in older Tailwind configurations too." /></DocParagraph>
+<DocParagraph>
+  <Text
+    zh="旧项目的 hsl(var(--primary)) 需要改为 var(--primary)，因为导出值已是完整颜色。若旧 Tailwind 配置也使用 hsl 包装，需要同步修改。"
+    en="Replace legacy hsl(var(--primary)) with var(--primary): exported values are full colors. Update HSL wrappers in older Tailwind configurations too."
+  />
+</DocParagraph>
 
 ```css
 .brand {
@@ -57,11 +83,21 @@ document.documentElement.classList.toggle('dark', true);
 
 ## <Text zh="createShadcnCss" en="createShadcnCss" />
 
-<DocParagraph><Text zh="createShadcnCss(result) 返回基础变量及已生成模式的语义变量。建议生成 both 以支持明暗切换。" en="createShadcnCss(result) returns primitives and semantic variables for generated modes. Generate both to support switching." /></DocParagraph>
+<DocParagraph>
+  <Text
+    zh="createShadcnCss(result) 返回基础变量及已生成模式的语义变量。建议生成 both 以支持明暗切换。"
+    en="createShadcnCss(result) returns primitives and semantic variables for generated modes. Generate both to support switching."
+  />
+</DocParagraph>
 
 ## <Text zh="createShadcnTokens" en="createShadcnTokens" />
 
-<DocParagraph><Text zh="接收 SemanticTheme，返回 CSS 变量名到完整颜色值的对象，适合局部容器或运行时注入。" en="Accepts a SemanticTheme and returns CSS variable names mapped to full colors, suitable for scoped containers or runtime injection." /></DocParagraph>
+<DocParagraph>
+  <Text
+    zh="接收 SemanticTheme，返回 CSS 变量名到完整颜色值的对象，适合局部容器或运行时注入。"
+    en="Accepts a SemanticTheme and returns CSS variable names mapped to full colors, suitable for scoped containers or runtime injection."
+  />
+</DocParagraph>
 
 ```ts
 import { createShadcnTokens } from '@okramp/shadcn';
@@ -73,4 +109,9 @@ for (const [key, value] of Object.entries(tokens)) {
 
 ## <Text zh="变量范围与边界" en="Variables and boundaries" />
 
-<DocParagraph><Text zh="覆盖 background、foreground、card、popover、primary、secondary、muted、accent、border、input、ring 及 sidebar。不会生成 destructive、chart 或布局变量。局部注入时注意 Dialog 等 Portal 的挂载位置。" en="Covers background, foreground, card, popover, primary, secondary, muted, accent, border, input, ring and sidebar. Does not generate destructive, chart or layout variables. Check portal placement for scoped themes." /></DocParagraph>
+<DocParagraph>
+  <Text
+    zh="覆盖 background、foreground、card、popover、primary、secondary、muted、accent、border、input、ring 及 sidebar。不会生成 destructive、chart 或布局变量。局部注入时注意 Dialog 等 Portal 的挂载位置。"
+    en="Covers background, foreground, card, popover, primary, secondary, muted, accent, border, input, ring and sidebar. Does not generate destructive, chart or layout variables. Check portal placement for scoped themes."
+  />
+</DocParagraph>

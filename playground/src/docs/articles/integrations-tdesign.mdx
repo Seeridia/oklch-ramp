@@ -7,7 +7,12 @@ import Part1Section2 from '../content/tdesign-scope';
 
 ## <Text zh="安装适配器" en="Install the adapter" />
 
-<DocParagraph><Text zh="核心包负责生成颜色，TDesign 包负责映射组件库变量。" en="The core generates colors; the TDesign adapter maps component variables." /></DocParagraph>
+<DocParagraph>
+  <Text
+    zh="核心包负责生成颜色，TDesign 包负责映射组件库变量。"
+    en="The core generates colors; the TDesign adapter maps component variables."
+  />
+</DocParagraph>
 
 ```bash
 npm install @okramp/core @okramp/tdesign tdesign-react
@@ -15,21 +20,32 @@ npm install @okramp/core @okramp/tdesign tdesign-react
 
 ## <Text zh="生成完整主题 CSS" en="Generate theme CSS" />
 
-<DocParagraph><Text zh="将输出保存为 okramp-theme.css，在 TDesign 默认样式之后加载。CSS 包含品牌、中性色阶和引用它们的语义变量。" en="Save the output as okramp-theme.css and load it after TDesign styles. It includes brand and neutral primitives and semantic variable references." /></DocParagraph>
+<DocParagraph>
+  <Text
+    zh="将输出保存为 okramp-theme.css，在 TDesign 默认样式之后加载。CSS 包含品牌、中性色阶和引用它们的语义变量。"
+    en="Save the output as okramp-theme.css and load it after TDesign styles. It includes brand and neutral primitives and semantic variable references."
+  />
+</DocParagraph>
 
 ```ts
 import { generateColorTheme } from '@okramp/core';
 import { createTDesignCss } from '@okramp/tdesign';
 
 const result = generateColorTheme('#0052D9', {
-  mode: 'both', contrastPolicy: 'adjust',
+  mode: 'both',
+  contrastPolicy: 'adjust',
 });
 const css = createTDesignCss(result);
 ```
 
 ## <Text zh="加载与切换" en="Load and switch" />
 
-<DocParagraph><Text zh="浅色使用默认根节点，深色设置 theme-mode 属性。切换属性会同时更新语义变量，无需重新生成色阶。" en="Light uses the default root; dark uses the theme-mode attribute. Switching updates semantic variables without regenerating scales." /></DocParagraph>
+<DocParagraph>
+  <Text
+    zh="浅色使用默认根节点，深色设置 theme-mode 属性。切换属性会同时更新语义变量，无需重新生成色阶。"
+    en="Light uses the default root; dark uses the theme-mode attribute. Switching updates semantic variables without regenerating scales."
+  />
+</DocParagraph>
 
 ```ts
 import 'tdesign-react/dist/tdesign.css';
@@ -46,7 +62,12 @@ document.documentElement.removeAttribute('theme-mode');
 
 ## <Text zh="CSS 与变量对象" en="CSS and token objects" />
 
-<DocParagraph><Text zh="createTDesignCss(result) 返回可保存的 CSS。createTDesignTokens(result) 返回 light、dark 变量对象，适合运行时注入；仅使用实际生成的模式。" en="createTDesignCss(result) returns CSS. createTDesignTokens(result) returns light and dark token objects for runtime injection; use a generated mode." /></DocParagraph>
+<DocParagraph>
+  <Text
+    zh="createTDesignCss(result) 返回可保存的 CSS。createTDesignTokens(result) 返回 light、dark 变量对象，适合运行时注入；仅使用实际生成的模式。"
+    en="createTDesignCss(result) returns CSS. createTDesignTokens(result) returns light and dark token objects for runtime injection; use a generated mode."
+  />
+</DocParagraph>
 
 ```ts
 import { createTDesignTokens } from '@okramp/tdesign';
@@ -58,11 +79,21 @@ for (const [key, value] of Object.entries(tokens.light)) {
 
 ## <Text zh="样式作用域" en="Style scope" />
 
-<DocParagraph><Text zh="内联注入优先级高于样式表。选择一种接入方式；使用内联变量时，明暗切换也必须注入对应模式的完整变量对象。浮层挂载到 body 时需要根节点变量。" en="Inline variables override stylesheets. Choose one integration method; inline themes must inject the full token object on mode changes. Portals attached to body need root variables." /></DocParagraph>
+<DocParagraph>
+  <Text
+    zh="内联注入优先级高于样式表。选择一种接入方式；使用内联变量时，明暗切换也必须注入对应模式的完整变量对象。浮层挂载到 body 时需要根节点变量。"
+    en="Inline variables override stylesheets. Choose one integration method; inline themes must inject the full token object on mode changes. Portals attached to body need root variables."
+  />
+</DocParagraph>
 
 ## <Text zh="覆盖范围" en="Coverage" />
 
-<DocParagraph><Text zh="映射品牌交互、文字、背景、边框等颜色。成功、警告、错误等状态色以及字号、间距、圆角沿用 TDesign 默认值。" en="Maps brand interaction, text, surface and border colors. Success, warning, error and typography, spacing and radii retain TDesign defaults." /></DocParagraph>
+<DocParagraph>
+  <Text
+    zh="映射品牌交互、文字、背景、边框等颜色。成功、警告、错误等状态色以及字号、间距、圆角沿用 TDesign 默认值。"
+    en="Maps brand interaction, text, surface and border colors. Success, warning, error and typography, spacing and radii retain TDesign defaults."
+  />
+</DocParagraph>
 
 <Part1Section1 />
 

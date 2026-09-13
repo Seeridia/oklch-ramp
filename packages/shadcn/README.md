@@ -42,9 +42,9 @@ document.documentElement.classList.toggle('dark', true);
 
 ## API
 
-| 函数 | 返回值 |
-| --- | --- |
-| `createShadcnCss(result)` | 包含基础色阶及已生成模式的 CSS 字符串 |
+| 函数                                | 返回值                                               |
+| ----------------------------------- | ---------------------------------------------------- |
+| `createShadcnCss(result)`           | 包含基础色阶及已生成模式的 CSS 字符串                |
 | `createShadcnTokens(semanticTheme)` | CSS 变量名到完整颜色值的对象，可用于运行时或局部主题 |
 
 ```ts

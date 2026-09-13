@@ -5,7 +5,10 @@ import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  plugins: [{ ...mdx({ rehypePlugins: [rehypeSlug], remarkPlugins: [remarkGfm] }), enforce: 'pre' }, react()],
+  plugins: [
+    { ...mdx({ rehypePlugins: [rehypeSlug], remarkPlugins: [remarkGfm] }), enforce: 'pre' },
+    react(),
+  ],
   resolve: {
     alias: {
       '@okramp/tdesign': decodeURIComponent(

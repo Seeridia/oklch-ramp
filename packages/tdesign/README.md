@@ -57,13 +57,13 @@ for (const [name, value] of Object.entries(tokens.light)) {
 
 ## API
 
-| 导出 | 用途 |
-| --- | --- |
-| `createTDesignCss(result)` | 返回基础变量和明暗语义变量的 CSS 字符串 |
-| `createTDesignTokens(result)` | 返回 `{ light, dark }` 变量对象，未生成的模式为空对象 |
+| 导出                              | 用途                                                              |
+| --------------------------------- | ----------------------------------------------------------------- |
+| `createTDesignCss(result)`        | 返回基础变量和明暗语义变量的 CSS 字符串                           |
+| `createTDesignTokens(result)`     | 返回 `{ light, dark }` 变量对象，未生成的模式为空对象             |
 | `toTDesignTheme(theme, neutral?)` | 将单个语义主题映射为 TDesign 变量，传入中性色阶以应用中性角色层级 |
-| `mappedThemes` | `createTDesignTokens` 的同一实现 |
-| `TOKEN_MAP`、`semanticValue` | 用于自定义映射的底层工具 |
+| `mappedThemes`                    | `createTDesignTokens` 的同一实现                                  |
+| `TOKEN_MAP`、`semanticValue`      | 用于自定义映射的底层工具                                          |
 
 ## 适配范围
 

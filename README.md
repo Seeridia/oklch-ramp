@@ -80,11 +80,11 @@ console.log(theme.themes.dark?.color.background.page);
 
 ## 选择生成策略
 
-| 策略 | 输入色保留方式 | 适用场景 |
-| --- | --- | --- |
-| `tonal` 默认 | 不保证原样保留 | 探索主题，处理过浅或过深的输入 |
-| `adaptive-anchor` | 保留规范化主色，自动选择阶位 | 品牌色必须保留，阶位可以变化 |
-| `fixed-anchor` | 保留规范化主色，固定在指定阶位 | 已有明确的设计系统阶位约定 |
+| 策略              | 输入色保留方式                 | 适用场景                       |
+| ----------------- | ------------------------------ | ------------------------------ |
+| `tonal` 默认      | 不保证原样保留                 | 探索主题，处理过浅或过深的输入 |
+| `adaptive-anchor` | 保留规范化主色，自动选择阶位   | 品牌色必须保留，阶位可以变化   |
+| `fixed-anchor`    | 保留规范化主色，固定在指定阶位 | 已有明确的设计系统阶位约定     |
 
 ```ts
 const anchored = generateColorScale('#0052D9', {
@@ -116,12 +116,12 @@ const scale = generateColorScale('#0052D9', {
 
 核心负责颜色计算，适配包负责组件库的 Token 映射。只需安装项目实际使用的适配器。
 
-| 包 | npm 版本 | 用途 |
-| --- | --- | --- |
-| [`@okramp/core`](https://www.npmjs.com/package/@okramp/core) | [![npm](https://img.shields.io/npm/v/%40okramp%2Fcore?label=version)](https://www.npmjs.com/package/@okramp/core) | 色阶、中性色、语义主题及诊断 |
-| [`@okramp/tdesign`](./packages/tdesign/README.md) | [![npm](https://img.shields.io/npm/v/%40okramp%2Ftdesign?label=version)](https://www.npmjs.com/package/@okramp/tdesign) | TDesign CSS 变量与主题导出 |
-| [`@okramp/antd`](./packages/antd/README.md) | [![npm](https://img.shields.io/npm/v/%40okramp%2Fantd?label=version)](https://www.npmjs.com/package/@okramp/antd) | Ant Design 5/6 ConfigProvider 配置 |
-| [`@okramp/shadcn`](./packages/shadcn/README.md) | [![npm](https://img.shields.io/npm/v/%40okramp%2Fshadcn?label=version)](https://www.npmjs.com/package/@okramp/shadcn) | shadcn/ui 语义变量与明暗 CSS |
+| 包                                                           | npm 版本                                                                                                                | 用途                               |
+| ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| [`@okramp/core`](https://www.npmjs.com/package/@okramp/core) | [![npm](https://img.shields.io/npm/v/%40okramp%2Fcore?label=version)](https://www.npmjs.com/package/@okramp/core)       | 色阶、中性色、语义主题及诊断       |
+| [`@okramp/tdesign`](./packages/tdesign/README.md)            | [![npm](https://img.shields.io/npm/v/%40okramp%2Ftdesign?label=version)](https://www.npmjs.com/package/@okramp/tdesign) | TDesign CSS 变量与主题导出         |
+| [`@okramp/antd`](./packages/antd/README.md)                  | [![npm](https://img.shields.io/npm/v/%40okramp%2Fantd?label=version)](https://www.npmjs.com/package/@okramp/antd)       | Ant Design 5/6 ConfigProvider 配置 |
+| [`@okramp/shadcn`](./packages/shadcn/README.md)              | [![npm](https://img.shields.io/npm/v/%40okramp%2Fshadcn?label=version)](https://www.npmjs.com/package/@okramp/shadcn)   | shadcn/ui 语义变量与明暗 CSS       |
 
 例如，生成 TDesign 主题样式：
 
@@ -147,11 +147,11 @@ TDesign 和 shadcn/ui 的 CSS 语义变量引用基础色阶，便于追踪来�
 
 `generateColorTheme` 支持三种对比度策略：
 
-| 策略 | 行为 |
-| --- | --- |
-| `report` 默认 | 保留颜色，报告检查结果 |
-| `adjust` | 从已有色阶中选择接近原值且满足目标的颜色；无合格候选时报告失败 |
-| `strict` | 不调整颜色，存在失败项时抛出 `ColorScaleError` |
+| 策略          | 行为                                                           |
+| ------------- | -------------------------------------------------------------- |
+| `report` 默认 | 保留颜色，报告检查结果                                         |
+| `adjust`      | 从已有色阶中选择接近原值且满足目标的颜色；无合格候选时报告失败 |
+| `strict`      | 不调整颜色，存在失败项时抛出 `ColorScaleError`                 |
 
 默认目标为普通文字 `4.5:1`、重要非文本元素 `3:1`。检查只覆盖引擎列出的颜色组合，不等同于整个页面或组件库适配后的可访问性认证。
 

@@ -20,7 +20,9 @@ export function Code({
 }) {
   const { t } = useI18n();
   const highlighted = useMemo(
-    () => hljs.highlight(children, { language: hljs.getLanguage(language) ? language : 'plaintext' }).value,
+    () =>
+      hljs.highlight(children, { language: hljs.getLanguage(language) ? language : 'plaintext' })
+        .value,
     [children, language],
   );
   return (
@@ -53,7 +55,15 @@ export function Definitions({ items }: { items: Array<[string, string]> }) {
   );
 }
 
-export function Section({ id, title, children }: { id: string; title: string; children: ReactNode }) {
+export function Section({
+  id,
+  title,
+  children,
+}: {
+  id: string;
+  title: string;
+  children: ReactNode;
+}) {
   return (
     <section id={id} className="guide-doc-section">
       <DocHeading level="h2">{title}</DocHeading>
@@ -70,13 +80,24 @@ export function Text({ zh, en }: { zh: string; en: string }) {
 export const DocParagraph = Typography.Paragraph;
 export const DocLink = Link;
 export function DocHeading({
-  id, level = 'h2', children,
+  id,
+  level = 'h2',
+  children,
 }: {
   id?: string;
   level?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
   children?: ReactNode;
 }) {
-  return <Typography.Title level={level} ref={node => { if (node && id) node.id = id; }}>{children}</Typography.Title>;
+  return (
+    <Typography.Title
+      level={level}
+      ref={(node) => {
+        if (node && id) node.id = id;
+      }}
+    >
+      {children}
+    </Typography.Title>
+  );
 }
 export function InlineCode({ children }: { children?: ReactNode }) {
   return <Typography.Text code>{children}</Typography.Text>;

@@ -18,15 +18,15 @@ vp run demo
 
 ## 页面与功能
 
-| 页面或区域 | 功能 |
-| --- | --- |
-| 工作台 | 调整主色、策略、阶数、锚点与高级参数，查看品牌和关联中性色阶 |
-| 色彩详情 | 查看 HEX、RGB、OKLCH 数值并复制 |
-| 组件预览 | 使用真实 TDesign 组件，并排观察浅色与深色主题 |
-| Token 与诊断 | 查看语义映射、颜色组合对比度与生成警告 |
-| 方案对比 | 逐行比较 OKRamp、TDesign、Ant Design、HSL、sRGB 和 CIELAB 的结果 |
-| 使用指南 | 快速开始、原理、主题、组件库集成、API 与诊断 |
-| 导出 | 生成可用于项目的颜色和主题文件 |
+| 页面或区域   | 功能                                                             |
+| ------------ | ---------------------------------------------------------------- |
+| 工作台       | 调整主色、策略、阶数、锚点与高级参数，查看品牌和关联中性色阶     |
+| 色彩详情     | 查看 HEX、RGB、OKLCH 数值并复制                                  |
+| 组件预览     | 使用真实 TDesign 组件，并排观察浅色与深色主题                    |
+| Token 与诊断 | 查看语义映射、颜色组合对比度与生成警告                           |
+| 方案对比     | 逐行比较 OKRamp、TDesign、Ant Design、HSL、sRGB 和 CIELAB 的结果 |
+| 使用指南     | 快速开始、原理、主题、组件库集成、API 与诊断                     |
+| 导出         | 生成可用于项目的颜色和主题文件                                   |
 
 工作台参数使用 URL 中的 `workspace.*`，对比参数使用 `compare.*`，可通过复制地址分享配置。A 表示输入色锚点，R 表示推荐阶位；两者重合时显示 A。无效输入会保留最后一次有效结果并暂停导出。
 
@@ -42,18 +42,18 @@ vp run demo
 
 ## 代码结构
 
-| 位置 | 职责 |
-| --- | --- |
-| `src/App.tsx` | 应用布局、页面与导出流程 |
-| `src/model.ts` | 参数模型与生成入口 |
-| `src/components/Controls.tsx` | 基础和高级参数控件 |
-| `src/components/Scales.tsx` | 色阶、详情和复制 |
-| `src/components/Preview.tsx` | 真实组件及业务场景 |
-| `src/components/Analysis.tsx` | Token、诊断和方案对比 |
-| `src/components/Guide.tsx` | 文章导航与自动大纲 |
-| `src/export.ts` | 主题与颜色导出 |
-| `src/adapters/tdesign.ts` | TDesign 适配包接入 |
-| `src/docs/` | MDX 文章与双语内容 |
+| 位置                          | 职责                     |
+| ----------------------------- | ------------------------ |
+| `src/App.tsx`                 | 应用布局、页面与导出流程 |
+| `src/model.ts`                | 参数模型与生成入口       |
+| `src/components/Controls.tsx` | 基础和高级参数控件       |
+| `src/components/Scales.tsx`   | 色阶、详情和复制         |
+| `src/components/Preview.tsx`  | 真实组件及业务场景       |
+| `src/components/Analysis.tsx` | Token、诊断和方案对比    |
+| `src/components/Guide.tsx`    | 文章导航与自动大纲       |
+| `src/export.ts`               | 主题与颜色导出           |
+| `src/adapters/tdesign.ts`     | TDesign 适配包接入       |
+| `src/docs/`                   | MDX 文章与双语内容       |
 
 ## 编辑使用指南
 
