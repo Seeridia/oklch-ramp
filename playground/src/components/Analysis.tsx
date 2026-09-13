@@ -303,6 +303,7 @@ function ComparisonRamp({
   seed: string;
 }) {
   const toOklch = converter('oklch');
+  const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
   return (
     <div
       className="comparison-ramp"
@@ -314,11 +315,18 @@ function ComparisonRamp({
         const retained = formatHex(color) === formatHex(seed);
         const details = `${formatHex(color)} · OKLCH L ${toOklch(color)!.l.toFixed(3)} · ${retained ? '与输入色一致' : '与输入色不同'}${isAnchor ? ' · A 输入色锚点' : ''}${isRecommended ? ' · R 推荐主色' : ''}`;
         return (
-          <Tooltip key={`${color}-${index}`} content={details} trigger={['hover', 'focus']}>
+          <Tooltip
+            key={`${color}-${index}`}
+            content={details}
+            trigger="hover"
+            visible={focusedIndex === index ? true : undefined}
+          >
             <button
               type="button"
               style={{ background: color, color: chooseContrastingForeground(color) }}
               aria-label={`复制第 ${index + 1} 阶：${details}`}
+              onFocus={() => setFocusedIndex(index)}
+              onBlur={() => setFocusedIndex(null)}
               onClick={() => void copyText(color)}
             >
               <span>{String(index + 1).padStart(2, '0')}</span>

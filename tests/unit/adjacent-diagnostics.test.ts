@@ -44,5 +44,8 @@ it('preserves both scale sources when merging theme diagnostics', () => {
   const messages = result.diagnostics.messages.filter(
     (item) => item.code === 'LOW_ADJACENT_DIFFERENCE',
   );
-  expect(messages.map((item) => item.details?.scale).sort()).toEqual(['brand', 'neutral']);
+  expect(messages).toHaveLength(2);
+  expect(messages.map((item) => item.details?.scale)).toEqual(
+    expect.arrayContaining(['brand', 'neutral']),
+  );
 });

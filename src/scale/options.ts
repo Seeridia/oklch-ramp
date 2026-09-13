@@ -44,7 +44,7 @@ function assertCurve(
 export function resolveScaleOptions(options: ColorScaleOptions = {}): ResolvedScaleOptions {
   const endpoints = options.endpoints ?? 'curve';
   if (endpoints !== 'curve' && endpoints !== 'black-white') {
-    throw new ColorScaleError('INVALID_OPTIONS', `Unknown endpoints mode: ${endpoints}`, {
+    throw new ColorScaleError('INVALID_OPTIONS', `Unknown endpoints mode: ${String(endpoints)}`, {
       endpoints,
     });
   }
