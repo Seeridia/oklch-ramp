@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.0
+
+- feat: migrate to okramp and extract TDesign adapter ([dc59b25](https://github.com/Seeridia/okramp/commit/dc59b257f4176e2fb40a02b4f4c6c2138c6f304d))
+- docs: update npm publication status and format workspace manifest ([a5acc2b](https://github.com/Seeridia/okramp/commit/a5acc2b2f9417c82ada31088ed21d12b007216e3))
+- docs: confirm TDesign adapter npm publication ([9425085](https://github.com/Seeridia/okramp/commit/94250852a4961ff9b7347075b6011f163e21ad8c))
+- fix: resolve adapter and demo type checks ([37c5856](https://github.com/Seeridia/okramp/commit/37c5856b1528d82f6ad8f5fea18f998df8d1744f))
+- feat: migrate packages to the okramp npm scope ([f0c8cec](https://github.com/Seeridia/okramp/commit/f0c8cec20b232e7df965db1c46b594a24619f6bc))
+- feat: add Ant Design and shadcn theme adapters ([9052744](https://github.com/Seeridia/okramp/commit/90527442558700d6d8c51292eb843537771c67b2))
+
 ## 0.2.1
 
 - ci: automate version PRs and publish npm after merge ([261398d](https://github.com/Seeridia/oklch-ramp/commit/261398d4b4644a25d25e37e8433801afaed6eb61))
