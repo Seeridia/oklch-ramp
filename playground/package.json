@@ -1,5 +1,5 @@
 {
-  "name": "color-scale-engine-playground",
+  "name": "okramp-playground",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -7,15 +7,19 @@
     "dev": "vp dev",
     "build": "vp build",
     "check": "vp check",
-    "preview": "vp preview"
+    "preview": "vp preview",
+    "sync:themes": "node scripts/sync-theme-scopes.mjs"
   },
   "dependencies": {
-    "@phosphor-icons/react": "2.1.10",
-    "color-scale-engine": "workspace:*",
+    "culori": "4.0.2",
+    "oklch-ramp": "workspace:*",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "tdesign-icons-react": "0.6.11",
+    "tdesign-react": "1.18.3"
   },
   "devDependencies": {
+    "@types/culori": "4.0.1",
     "@types/react": "19.2.7",
     "@types/react-dom": "19.2.3",
     "@vitejs/plugin-react": "6.1.1",

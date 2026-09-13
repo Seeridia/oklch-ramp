@@ -80,7 +80,7 @@ function render(seed: string): void {
       <header class="hero">
         <div>
           <p class="kicker">OKLCH · sRGB · TypeScript</p>
-          <h1>Color Scale Engine</h1>
+          <h1>OKRamp</h1>
           <p>比较三种色阶策略，并检查品牌关联中性色和明暗主题。</p>
         </div>
         <div class="controls">

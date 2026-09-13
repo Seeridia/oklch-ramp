@@ -1,7 +1,7 @@
 {
-  "name": "color-scale-engine",
+  "name": "oklch-ramp",
   "version": "0.1.0",
-  "description": "Perceptual OKLCH color scales and semantic light/dark themes",
+  "description": "Perceptual color ramps and themes powered by OKLCH",
   "keywords": [
     "color",
     "dark-mode",
@@ -9,14 +9,14 @@
     "oklch",
     "palette"
   ],
-  "homepage": "https://github.com/Seeridia/color-scale-engine#readme",
+  "homepage": "https://github.com/Seeridia/oklch-ramp#readme",
   "bugs": {
-    "url": "https://github.com/Seeridia/color-scale-engine/issues"
+    "url": "https://github.com/Seeridia/oklch-ramp/issues"
   },
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Seeridia/color-scale-engine.git"
+    "url": "git+https://github.com/Seeridia/oklch-ramp.git"
   },
   "files": [
     "dist",
@@ -35,9 +35,14 @@
       "import": "./dist/index.mjs"
     }
   },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "scripts": {
     "benchmark": "vp pack && node scripts/benchmark.mjs",
     "build": "vp pack",
+    "prepack": "pnpm build",
     "check": "vp check",
     "coverage": "vp test run --coverage",
     "demo": "pnpm --dir playground dev",
@@ -49,6 +54,7 @@
   },
   "devDependencies": {
     "@types/culori": "4.0.1",
+    "@types/node": "^24.13.4",
     "@vitest/coverage-v8": "4.1.11",
     "fast-check": "4.9.0",
     "typescript": "6.0.3",

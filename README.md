@@ -1,6 +1,6 @@
-# Color Scale Engine
+# OKRamp
 
-一个基于 TypeScript 和 OKLCH 的框架无关颜色引擎。输入一个种子色，生成感知过渡更均匀的品牌色阶、品牌关联中性色阶，以及浅色/深色语义主题。
+Perceptual color ramps and themes powered by OKLCH。OKRamp 是一个基于 TypeScript 的框架无关颜色引擎：输入一个种子色，生成感知过渡更均匀的品牌色阶、品牌关联中性色阶，以及浅色/深色语义主题。
 
 ## 能力
 
@@ -13,12 +13,12 @@
 - 结构化诊断、稳定错误码和完整 TypeScript 类型；
 - 浏览器与 Node.js 均可使用，不依赖 DOM。
 
-核心库不依赖 TDesign，也不导出 `--td-*` Token。TDesign 映射将在核心 API 稳定后作为独立 Adapter 实现。
+核心库不依赖 TDesign，也不导出 `--td-*` Token。演示站已包含独立的应用级 TDesign Adapter，用于真实组件预览和 CSS/JSON/TypeScript 主题导出。该适配器不属于核心 npm 包 API。
 
 ## 安装
 
 ```bash
-pnpm add color-scale-engine
+pnpm add oklch-ramp
 ```
 
 当前仓库尚未发布到 npm；上面的包名是本项目预留名称。
@@ -26,7 +26,7 @@ pnpm add color-scale-engine
 ## 快速开始
 
 ```ts
-import { generateColorScale, generateColorTheme, generateNeutralScale } from 'color-scale-engine';
+import { generateColorScale, generateColorTheme, generateNeutralScale } from 'oklch-ramp';
 
 const brand = generateColorScale('#0052D9');
 console.log(brand.colors);
@@ -173,7 +173,9 @@ vp run benchmark
 
 ### 交互式演示站
 
-完整演示站位于 `playground/`，是一个独立的 React + TypeScript + Vite Plus 项目，直接引用工作区中的引擎源码。它覆盖三种策略、阶数与锚点、输出格式、色相偏移、中性色染色、明暗主题、对比度策略、诊断、语义 Token 和 CSS/JSON/TypeScript 导出。
+OKRamp 演示站位于 `playground/`，使用 React 19、TDesign React 1.18.3 和 Vite Plus，直接引用工作区中的引擎源码。界面参考 TDesign React Starter 的侧边导航与卡片布局，覆盖三种策略、阶数与锚点、输出格式、色相偏移、中性色染色、明暗主题、对比度策略和诊断。
+
+新增真实 TDesign 组件与项目列表预览、31 个主题变量映射、通用/TDesign 导出，以及浏览器本地方案保存。浅色、深色预览及其浮层独立作用域；核心颜色算法保持不变。详见 [演示站说明](./playground/README.md)。
 
 从仓库根目录启动：
 
@@ -194,6 +196,7 @@ pnpm build
 
 - [详细 API](./docs/API.md)
 - [算法说明](./docs/ALGORITHMS.md)
+- [npm 自动发版与首次配置](./docs/RELEASING.md)
 - [完整实施计划](./IMPLEMENTATION_PLAN.md)
 
 ## 兼容性

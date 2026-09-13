@@ -1,0 +1,79 @@
+name: Publish to npm
+
+on:
+  release:
+    types: [published]
+  # Manual runs validate and pack only; they never publish.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: npm-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.repository == 'Seeridia/oklch-ramp'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.24.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      # npm runs outside the workspace because devEngines requires pnpm there.
+      - name: Install OIDC-capable npm CLI
+        working-directory: ${{ runner.temp }}
+        run: npm install --global npm@11.19.0
+      - name: Validate release version
+        id: release
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          IS_PRERELEASE: ${{ github.event.release.prerelease }}
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFileSync, appendFileSync } from 'node:fs';
+          const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
+          if (pkg.name !== 'oklch-ramp' || pkg.private) {
+            throw new Error('Expected the public oklch-ramp package');
+          }
+          const prerelease = pkg.version.includes('-');
+          if (process.env.GITHUB_EVENT_NAME === 'release') {
+            if (process.env.RELEASE_TAG !== `v${pkg.version}`) {
+              throw new Error(`Release tag must be v${pkg.version}`);
+            }
+            if (prerelease !== (process.env.IS_PRERELEASE === 'true')) {
+              throw new Error('GitHub prerelease status must match the package version');
+            }
+          }
+          appendFileSync(process.env.GITHUB_OUTPUT, `tag=${prerelease ? 'next' : 'latest'}\n`);
+          NODE
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run check
+      - run: pnpm test
+      - run: pnpm demo:build
+      - name: Build and pack
+        run: pnpm pack --out "${RUNNER_TEMP}/oklch-ramp.tgz"
+      - name: Preview npm publication
+        working-directory: ${{ runner.temp }}
+        env:
+          DIST_TAG: ${{ steps.release.outputs.tag }}
+        run: npm publish ./oklch-ramp.tgz --dry-run --ignore-scripts --access public --tag "$DIST_TAG" --registry=https://registry.npmjs.org/
+      - name: Publish with npm Trusted Publishing
+        if: github.event_name == 'release'
+        working-directory: ${{ runner.temp }}
+        env:
+          DIST_TAG: ${{ steps.release.outputs.tag }}
+        run: npm publish ./oklch-ramp.tgz --ignore-scripts --access public --provenance --tag "$DIST_TAG" --registry=https://registry.npmjs.org/

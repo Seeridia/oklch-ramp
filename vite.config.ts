@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite-plus';
 
 export default defineConfig({
@@ -11,6 +12,7 @@ export default defineConfig({
     sourcemap: true,
   },
   test: {
+    alias: { 'oklch-ramp': fileURLToPath(new URL('./src/index.ts', import.meta.url)) },
     include: ['tests/**/*.test.ts'],
     environment: 'node',
     coverage: {

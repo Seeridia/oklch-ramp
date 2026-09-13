@@ -5,9 +5,7 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      'color-scale-engine': decodeURIComponent(
-        new URL('../src/index.ts', import.meta.url).pathname,
-      ),
+      'oklch-ramp': decodeURIComponent(new URL('../src/index.ts', import.meta.url).pathname),
     },
   },
   server: {
