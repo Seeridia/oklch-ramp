@@ -1,6 +1,6 @@
 {
-  "name": "oklch-ramp",
-  "version": "0.2.1",
+  "name": "okramp",
+  "version": "0.2.0",
   "description": "Perceptual color ramps and themes powered by OKLCH",
   "keywords": [
     "color",
@@ -9,14 +9,14 @@
     "oklch",
     "palette"
   ],
-  "homepage": "https://github.com/Seeridia/oklch-ramp#readme",
+  "homepage": "https://github.com/Seeridia/okramp#readme",
   "bugs": {
-    "url": "https://github.com/Seeridia/oklch-ramp/issues"
+    "url": "https://github.com/Seeridia/okramp/issues"
   },
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Seeridia/oklch-ramp.git"
+    "url": "git+https://github.com/Seeridia/okramp.git"
   },
   "files": [
     "dist",

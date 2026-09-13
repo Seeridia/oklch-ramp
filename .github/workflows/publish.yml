@@ -16,7 +16,7 @@ concurrency:
 jobs:
   prepare:
     if: >-
-      github.repository == 'Seeridia/oklch-ramp' &&
+      github.repository == 'Seeridia/okramp' &&
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.event == 'push' &&
       github.event.workflow_run.head_repository.full_name == github.repository
@@ -78,27 +78,28 @@ jobs:
           node --input-type=module <<'NODE'
           import { readFileSync, appendFileSync } from 'node:fs';
           const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
-          if (pkg.name !== 'oklch-ramp' || pkg.private || pkg.version !== process.env.RELEASE_VERSION) {
+          if (pkg.name !== 'okramp' || pkg.private || pkg.version !== process.env.RELEASE_VERSION) {
             throw new Error('Release package does not match the merged PR');
           }
-          const response = await fetch(`https://registry.npmjs.org/oklch-ramp/${pkg.version}`);
+          const response = await fetch(`https://registry.npmjs.org/okramp/${pkg.version}`);
           if (!response.ok && response.status !== 404) throw new Error(`Registry returned ${response.status}`);
           appendFileSync(process.env.GITHUB_OUTPUT, `exists=${response.ok}\n`);
           NODE
       - run: vp install --frozen-lockfile
       # Workspace types resolve through dist/index.d.mts on a fresh checkout.
       - run: vp pack
+      - run: vp -C packages/tdesign pack
       - run: vp check
       - run: vp test
       - run: vp run demo:build
       - name: Build and pack
-        run: vp pm pack --out "${RUNNER_TEMP}/oklch-ramp.tgz"
+        run: vp pm pack --out "${RUNNER_TEMP}/okramp.tgz"
       - name: Inspect packed files (no registry publication)
         working-directory: ${{ runner.temp }}
-        run: npm pack ./oklch-ramp.tgz --dry-run --ignore-scripts --json
+        run: npm pack ./okramp.tgz --dry-run --ignore-scripts --json
       - name: Publish with npm Trusted Publishing
         if: steps.registry.outputs.exists != 'true'
         working-directory: ${{ runner.temp }}
         env:
           DIST_TAG: latest
-        run: npm publish ./oklch-ramp.tgz --ignore-scripts --access public --provenance --tag "$DIST_TAG" --registry=https://registry.npmjs.org/
+        run: npm publish ./okramp.tgz --ignore-scripts --access public --provenance --tag "$DIST_TAG" --registry=https://registry.npmjs.org/

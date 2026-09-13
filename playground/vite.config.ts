@@ -5,7 +5,10 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      'oklch-ramp': decodeURIComponent(new URL('../src/index.ts', import.meta.url).pathname),
+      'okramp-tdesign': decodeURIComponent(
+        new URL('../packages/tdesign/src/index.ts', import.meta.url).pathname,
+      ),
+      okramp: decodeURIComponent(new URL('../src/index.ts', import.meta.url).pathname),
     },
   },
   server: {

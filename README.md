@@ -13,20 +13,20 @@ Perceptual color ramps and themes powered by OKLCH。OKRamp 是一个基于 Type
 - 结构化诊断、稳定错误码和完整 TypeScript 类型；
 - 浏览器与 Node.js 均可使用，不依赖 DOM。
 
-核心库不依赖 TDesign，也不导出 `--td-*` Token。演示站已包含独立的应用级 TDesign Adapter，用于真实组件预览和 CSS/JSON/TypeScript 主题导出。该适配器不属于核心 npm 包 API。
+核心库不依赖 TDesign，也不导出 `--td-*` Token。仓库包含独立的 `okramp-tdesign` 适配包，用于真实组件预览和 CSS/JSON/TypeScript 主题导出。该适配器不属于核心 npm 包 API。
 
 ## 安装
 
 ```bash
-pnpm add oklch-ramp
+pnpm add okramp
 ```
 
-已发布到 npm：[oklch-ramp](https://www.npmjs.com/package/oklch-ramp)。最新稳定版本以 npm 的 `latest` 为准。
+核心包已更名为 `okramp`；新名称尚待首次 npm 发布。
 
 ## 快速开始
 
 ```ts
-import { generateColorScale, generateColorTheme, generateNeutralScale } from 'oklch-ramp';
+import { generateColorScale, generateColorTheme, generateNeutralScale } from 'okramp';
 
 const brand = generateColorScale('#0052D9');
 console.log(brand.colors);
@@ -185,7 +185,7 @@ vp run benchmark
 
 OKRamp 演示站位于 `playground/`，使用 React 19、TDesign React 1.18.3 和 Vite+，直接引用工作区中的引擎源码。界面参考 TDesign React Starter 的侧边导航与卡片布局，覆盖三种策略、阶数与锚点、输出格式、色相偏移、中性色染色、明暗主题、对比度策略和诊断。
 
-提供真实 TDesign 组件与项目列表预览、31 个主题变量映射，以及通用/TDesign 导出。浅色、深色预览及其浮层独立作用域。详见 [演示站说明](./playground/README.md)。
+提供真实 TDesign 组件与项目列表预览、31 个主题变量映射，以及通用/TDesign 导出。界面默认使用简体中文，同时支持完整英文界面并记住用户的语言选择；页面文案、可访问名称和 TDesign 内置组件文案会同步切换。浅色、深色预览及其浮层独立作用域。详见 [演示站说明](./playground/README.md)。
 
 从仓库根目录启动：
 

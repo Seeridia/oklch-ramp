@@ -24,24 +24,60 @@ import {
   MoonIcon,
   CloseIcon,
 } from 'tdesign-icons-react';
-import type { ColorThemeResult, SemanticTheme } from 'oklch-ramp';
+import type { ColorThemeResult, SemanticTheme } from 'okramp';
 import { toTDesignTheme } from '../adapters/tdesign';
 import { AccessibleInput, Field } from './Controls';
 import { readUrlParam, updateUrlParams } from '../url-state';
+import { useI18n } from '../i18n';
+import enUS from 'tdesign-react/es/locale/en_US';
 interface Project {
   id: string;
   name: string;
   status: string;
   owner: string;
 }
-const PROJECTS: Project[] = [
-  { id: '1', name: '品牌设计系统', status: '进行中', owner: '林晓' },
-  { id: '2', name: '移动端体验升级', status: '已完成', owner: '陈墨' },
-  { id: '3', name: '工作台 2.0', status: '进行中', owner: '周宁' },
-  { id: '4', name: '产品官网', status: '待开始', owner: '林晓' },
-  { id: '5', name: '开放平台', status: '进行中', owner: '陈墨' },
-  { id: '6', name: '主题规范', status: '已完成', owner: '周宁' },
-];
+
+function createInitialProjects(isZh: boolean): Project[] {
+  return [
+    {
+      id: '1',
+      name: isZh ? '品牌设计系统' : 'Brand design system',
+      status: '进行中',
+      owner: isZh ? '林晓' : 'Lin Xiao',
+    },
+    {
+      id: '2',
+      name: isZh ? '移动端体验升级' : 'Mobile experience upgrade',
+      status: '已完成',
+      owner: isZh ? '陈墨' : 'Chen Mo',
+    },
+    {
+      id: '3',
+      name: isZh ? '工作台 2.0' : 'Workspace 2.0',
+      status: '进行中',
+      owner: isZh ? '周宁' : 'Zhou Ning',
+    },
+    {
+      id: '4',
+      name: isZh ? '产品官网' : 'Product website',
+      status: '待开始',
+      owner: isZh ? '林晓' : 'Lin Xiao',
+    },
+    {
+      id: '5',
+      name: isZh ? '开放平台' : 'Open platform',
+      status: '进行中',
+      owner: isZh ? '陈墨' : 'Chen Mo',
+    },
+    {
+      id: '6',
+      name: isZh ? '主题规范' : 'Theme specification',
+      status: '已完成',
+      owner: isZh ? '周宁' : 'Zhou Ning',
+    },
+  ];
+}
+
 function PreviewCanvas({
   theme,
   scene,
@@ -51,6 +87,14 @@ function PreviewCanvas({
   scene: string;
   neutral: ColorThemeResult['scales']['neutral'];
 }) {
+  const { isZh, t } = useI18n();
+  const modeLabel = theme.mode === 'light' ? t('浅色', 'light') : t('深色', 'dark');
+  const statusLabels: Record<string, string> = {
+    进行中: t('进行中', 'In progress'),
+    已完成: t('已完成', 'Completed'),
+    待开始: t('待开始', 'Not started'),
+  };
+  const statusLabel = (value: string) => statusLabels[value] ?? value;
   const host = useRef<HTMLDivElement>(null);
   const urlSuffix = theme.mode === 'light' ? 'Light' : 'Dark';
   const [checked, setChecked] = useState(true);
@@ -58,7 +102,7 @@ function PreviewCanvas({
   const [radio, setRadio] = useState('a');
   const [slider, setSlider] = useState(62);
   const [sampleTab, setSampleTab] = useState('overview');
-  const [input, setInput] = useState('品牌设计系统');
+  const [input, setInput] = useState(() => t('品牌设计系统', 'Brand design system'));
   const [choice, setChoice] = useState('design');
   const [search, setSearch] = useState(() => readUrlParam(`projectSearch${urlSuffix}`, ''));
   const [status, setStatus] = useState(() => readUrlParam(`projectStatus${urlSuffix}`, 'all'));
@@ -66,7 +110,7 @@ function PreviewCanvas({
     const value = Number(readUrlParam(`projectPage${urlSuffix}`, '1'));
     return Number.isInteger(value) && value > 0 ? value : 1;
   });
-  const [projects, setProjects] = useState(PROJECTS);
+  const [projects, setProjects] = useState<Project[]>(() => createInitialProjects(isZh));
   const [editing, setEditing] = useState<Project | null>(null);
   const [name, setName] = useState('');
   const filtered = projects.filter(
@@ -82,6 +126,10 @@ function PreviewCanvas({
     window.addEventListener('popstate', syncFromUrl);
     return () => window.removeEventListener('popstate', syncFromUrl);
   }, [urlSuffix]);
+  useEffect(() => {
+    setProjects(createInitialProjects(isZh));
+    setInput(isZh ? '品牌设计系统' : 'Brand design system');
+  }, [isZh]);
   return (
     <div className="preview-frame">
       <div className="preview-frame-label">
@@ -90,8 +138,8 @@ function PreviewCanvas({
         ) : (
           <MoonIcon aria-hidden="true" />
         )}{' '}
-        {theme.mode === 'light' ? '浅色主题' : '深色主题'}
-        <span>LIVE PREVIEW</span>
+        {theme.mode === 'light' ? t('浅色主题', 'Light theme') : t('深色主题', 'Dark theme')}
+        <span>{t('实时预览', 'LIVE PREVIEW')}</span>
       </div>
       <div
         ref={host}
@@ -99,19 +147,19 @@ function PreviewCanvas({
         data-mode={theme.mode}
         style={toTDesignTheme(theme, neutral) as CSSProperties}
       >
-        <ConfigProvider globalConfig={{ attach: () => host.current! }}>
+        <ConfigProvider globalConfig={{ ...(isZh ? {} : enUS), attach: () => host.current! }}>
           <div className="preview-brand">
             <LayersIcon aria-hidden="true" />
-            <strong>Design Workspace</strong>
+            <strong>{t('设计工作台', 'Design Workspace')}</strong>
             <Tag size="small" theme="primary" variant="light">
-              团队版
+              {t('团队版', 'Team')}
             </Tag>
           </div>
           {scene === 'components' ? (
             <div className="component-gallery">
               <section>
                 <h4>
-                  按钮 <span>Button</span>
+                  {t('按钮', 'Buttons')} <span>Button</span>
                 </h4>
                 <Space breakLine>
                   <Button
@@ -121,125 +169,151 @@ function PreviewCanvas({
                       setName('');
                     }}
                   >
-                    主要按钮
+                    {t('主要按钮', 'Primary')}
                   </Button>
-                  <Button variant="outline">次要按钮</Button>
+                  <Button variant="outline">{t('次要按钮', 'Secondary')}</Button>
                   <Button theme="primary" variant="text">
-                    文字按钮
+                    {t('文字按钮', 'Text button')}
                   </Button>
                   <Button theme="primary" disabled>
-                    禁用
+                    {t('禁用', 'Disabled')}
                   </Button>
                 </Space>
-                <p className="field-hint">可悬停、按下与键盘聚焦，观察真实交互状态。</p>
+                <p className="field-hint">
+                  {t(
+                    '可悬停、按下与键盘聚焦，观察真实交互状态。',
+                    'Hover, press, or focus with the keyboard to inspect real interaction states.',
+                  )}
+                </p>
               </section>
               <section>
                 <h4>
-                  表单 <span>Form</span>
+                  {t('表单', 'Forms')} <span>Form</span>
                 </h4>
                 <div className="preview-form">
                   <AccessibleInput
-                    aria-label={`${theme.mode} 示例名称`}
+                    aria-label={t('{mode}示例名称', '{mode} sample name', { mode: modeLabel })}
                     name={`${theme.mode}-sample-name`}
                     value={input}
                     onChange={setInput}
-                    placeholder="例如：品牌设计系统…"
+                    placeholder={t('例如：品牌设计系统…', 'e.g. Brand design system…')}
                     autocomplete="off"
                   />
                   <Select
-                    aria-label={`${theme.mode} 示例分类`}
+                    aria-label={t('{mode}示例分类', '{mode} sample category', { mode: modeLabel })}
                     inputProps={{ name: `${theme.mode}-sample-category`, autocomplete: 'off' }}
                     value={choice}
                     onChange={(v) => setChoice(typeof v === 'string' ? v : 'design')}
                     options={[
-                      { label: '设计系统', value: 'design' },
-                      { label: '产品体验', value: 'product' },
+                      { label: t('设计系统', 'Design system'), value: 'design' },
+                      { label: t('产品体验', 'Product experience'), value: 'product' },
                     ]}
                   />
                   <AccessibleInput
-                    aria-label={`${theme.mode} 禁用状态示例`}
+                    aria-label={t('{mode}禁用状态示例', '{mode} disabled example', {
+                      mode: modeLabel,
+                    })}
                     name={`${theme.mode}-disabled-example`}
-                    value="禁用状态"
+                    value={t('禁用状态', 'Disabled state')}
                     disabled
                   />
                   <div>
                     <AccessibleInput
-                      aria-label={`${theme.mode} 错误状态示例`}
+                      aria-label={t('{mode}错误状态示例', '{mode} error example', {
+                        mode: modeLabel,
+                      })}
                       aria-describedby={`${theme.mode}-sample-error`}
                       name={`${theme.mode}-error-example`}
-                      placeholder="例如：请输入项目名称…"
+                      placeholder={t('例如：请输入项目名称…', 'e.g. Enter a project name…')}
                       status="error"
                     />
                     <p className="preview-field-error" id={`${theme.mode}-sample-error`}>
-                      项目名称不能为空
+                      {t('项目名称不能为空', 'Project name is required')}
                     </p>
                   </div>
                 </div>
               </section>
               <section>
                 <h4>
-                  选择与控制 <span>Selection</span>
+                  {t('选择与控制', 'Selection controls')} <span>Selection</span>
                 </h4>
                 <Space breakLine size={24}>
                   <Checkbox checked={checked} onChange={setChecked}>
-                    自动同步
+                    {t('自动同步', 'Auto sync')}
                   </Checkbox>
                   <Radio.Group
-                    aria-label={`${theme.mode} 配置方式`}
+                    aria-label={t('{mode}配置方式', '{mode} configuration mode', {
+                      mode: modeLabel,
+                    })}
                     value={radio}
                     onChange={(v) => setRadio(String(v))}
                     options={[
-                      { label: '默认', value: 'a' },
-                      { label: '自定义', value: 'b' },
+                      { label: t('默认', 'Default'), value: 'a' },
+                      { label: t('自定义', 'Custom'), value: 'b' },
                     ]}
                   />
                   <Switch
                     value={enabled}
                     onChange={(v) => setEnabled(Boolean(v))}
-                    aria-label={`${theme.mode} 启用主题`}
+                    aria-label={t('{mode}启用主题', '{mode} enable theme', { mode: modeLabel })}
                   />
                 </Space>
                 <Slider
-                  aria-label={`${theme.mode} 配置强度`}
+                  aria-label={t('{mode}配置强度', '{mode} intensity', { mode: modeLabel })}
                   value={slider}
                   onChange={(v) => setSlider(Number(v))}
                 />
               </section>
               <section>
                 <h4>
-                  导航与状态 <span>Feedback</span>
+                  {t('导航与状态', 'Navigation and status')} <span>Feedback</span>
                 </h4>
                 <Tabs value={sampleTab} onChange={(v) => setSampleTab(String(v))}>
-                  <Tabs.TabPanel value="overview" label="概览">
-                    <p className="sample-tab-copy">查看当前主题的整体表现。</p>
+                  <Tabs.TabPanel value="overview" label={t('概览', 'Overview')}>
+                    <p className="sample-tab-copy">
+                      {t('查看当前主题的整体表现。', 'Review the overall appearance of the theme.')}
+                    </p>
                   </Tabs.TabPanel>
-                  <Tabs.TabPanel value="members" label="成员">
-                    <p className="sample-tab-copy">3 位成员正在参与设计协作。</p>
+                  <Tabs.TabPanel value="members" label={t('成员', 'Members')}>
+                    <p className="sample-tab-copy">
+                      {t(
+                        '3 位成员正在参与设计协作。',
+                        'Three members are collaborating on the design.',
+                      )}
+                    </p>
                   </Tabs.TabPanel>
                 </Tabs>
                 <Space breakLine>
                   <Tag theme="primary" variant="light">
-                    品牌标签
+                    {t('品牌标签', 'Brand tag')}
                   </Tag>
                   <Tag theme="success" variant="light">
-                    已完成
+                    {t('已完成', 'Completed')}
                   </Tag>
                   <Tag theme="warning" variant="light">
-                    待处理
+                    {t('待处理', 'Pending')}
                   </Tag>
                   <Tag theme="danger" variant="light">
-                    需关注
+                    {t('需关注', 'Attention')}
                   </Tag>
                 </Space>
-                <Alert theme="info" message="主题已就绪，开始构建你的下一款产品。" />
+                <Alert
+                  theme="info"
+                  message={t(
+                    '主题已就绪，开始构建你的下一款产品。',
+                    'Your theme is ready. Start building your next product.',
+                  )}
+                />
               </section>
             </div>
           ) : (
             <div className="business-scene">
               <div className="section-heading">
                 <div>
-                  <h3>项目列表</h3>
-                  <p>让每一个好想法，有序发生。</p>
+                  <h3>{t('项目列表', 'Projects')}</h3>
+                  <p>
+                    {t('让每一个好想法，有序发生。', 'Give every good idea a clear path forward.')}
+                  </p>
                 </div>
                 <Button
                   theme="primary"
@@ -249,15 +323,15 @@ function PreviewCanvas({
                     setName('');
                   }}
                 >
-                  新建项目
+                  {t('新建项目', 'New project')}
                 </Button>
               </div>
               <div className="business-filter">
                 <AccessibleInput
-                  aria-label={`${theme.mode} 搜索项目`}
+                  aria-label={t('{mode}搜索项目', '{mode} search projects', { mode: modeLabel })}
                   name={`${theme.mode}-project-search`}
                   prefixIcon={<SearchIcon aria-hidden="true" />}
-                  placeholder="例如：品牌设计系统…"
+                  placeholder={t('例如：品牌设计系统…', 'e.g. Brand design system…')}
                   autocomplete="off"
                   value={search}
                   onChange={(v) => {
@@ -273,7 +347,7 @@ function PreviewCanvas({
                   }}
                 />
                 <Select
-                  aria-label={`${theme.mode} 项目状态`}
+                  aria-label={t('{mode}项目状态', '{mode} project status', { mode: modeLabel })}
                   inputProps={{ name: `${theme.mode}-project-status`, autocomplete: 'off' }}
                   value={status}
                   onChange={(v) => {
@@ -290,7 +364,7 @@ function PreviewCanvas({
                   }}
                   options={['all', '进行中', '已完成', '待开始'].map((v) => ({
                     value: v,
-                    label: v === 'all' ? '全部状态' : v,
+                    label: v === 'all' ? t('全部状态', 'All statuses') : statusLabel(v),
                   }))}
                 />
               </div>
@@ -298,10 +372,10 @@ function PreviewCanvas({
                 rowKey="id"
                 data={filtered.slice((page - 1) * 4, page * 4)}
                 columns={[
-                  { colKey: 'name', title: '项目名称', ellipsis: true },
+                  { colKey: 'name', title: t('项目名称', 'Project name'), ellipsis: true },
                   {
                     colKey: 'status',
-                    title: '状态',
+                    title: t('状态', 'Status'),
                     width: 85,
                     cell: ({ row }) => (
                       <Tag
@@ -315,13 +389,13 @@ function PreviewCanvas({
                               : 'default'
                         }
                       >
-                        {row.status}
+                        {statusLabel(row.status)}
                       </Tag>
                     ),
                   },
                   {
                     colKey: 'operation',
-                    title: '操作',
+                    title: t('操作', 'Actions'),
                     width: 65,
                     cell: ({ row }) => (
                       <Button
@@ -333,14 +407,14 @@ function PreviewCanvas({
                           setName(row.name);
                         }}
                       >
-                        编辑
+                        {t('编辑', 'Edit')}
                       </Button>
                     ),
                   },
                 ]}
               />
               <Pagination
-                aria-label={`${theme.mode} 项目分页`}
+                aria-label={t('{mode}项目分页', '{mode} project pagination', { mode: modeLabel })}
                 size="small"
                 total={filtered.length}
                 current={page}
@@ -363,15 +437,15 @@ function PreviewCanvas({
                 theme="default"
                 variant="text"
                 shape="square"
-                aria-label="关闭项目对话框"
+                aria-label={t('关闭项目对话框', 'Close project dialog')}
                 icon={<CloseIcon aria-hidden="true" />}
               />
             }
             visible={editing !== null}
-            header={editing?.id ? '编辑项目' : '新建项目'}
+            header={editing?.id ? t('编辑项目', 'Edit project') : t('新建项目', 'New project')}
             width="min(420px, calc(100vw - 32px))"
             placement="center"
-            confirmBtn={{ content: '保存项目', disabled: !name.trim() }}
+            confirmBtn={{ content: t('保存项目', 'Save project'), disabled: !name.trim() }}
             onClose={() => setEditing(null)}
             onConfirm={() => {
               if (!editing || !name.trim()) return;
@@ -384,19 +458,24 @@ function PreviewCanvas({
               setPage(1);
             }}
           >
-            <Field label="项目名称" htmlFor={`${theme.mode}-project-name`}>
+            <Field label={t('项目名称', 'Project name')} htmlFor={`${theme.mode}-project-name`}>
               <AccessibleInput
                 inputId={`${theme.mode}-project-name`}
                 name={`${theme.mode}-project-name`}
-                aria-label="项目名称"
+                aria-label={t('项目名称', 'Project name')}
                 value={name}
                 onChange={setName}
-                placeholder="例如：移动端体验升级…"
+                placeholder={t('例如：移动端体验升级…', 'e.g. Mobile experience upgrade…')}
                 maxlength={40}
                 autocomplete="off"
               />
             </Field>
-            <p className="field-hint">这是可交互的演示数据，仅在当前预览中生效。</p>
+            <p className="field-hint">
+              {t(
+                '这是可交互的演示数据，仅在当前预览中生效。',
+                'This interactive demo data exists only in the current preview.',
+              )}
+            </p>
           </Dialog>
         </ConfigProvider>
       </div>
@@ -404,6 +483,7 @@ function PreviewCanvas({
   );
 }
 export function Preview({ theme }: { theme: ColorThemeResult }) {
+  const { t } = useI18n();
   const [mode, setMode] = useState(() => {
     const value = readUrlParam('previewMode', 'both');
     return ['light', 'dark', 'both'].includes(value) ? value : 'both';
@@ -427,12 +507,17 @@ export function Preview({ theme }: { theme: ColorThemeResult }) {
       <Card bordered={false} className="preview-toolbar">
         <div className="section-heading">
           <div>
-            <h3>真实组件，实时主题</h3>
-            <p>基于 TDesign React · 状态色沿用官方默认值</p>
+            <h3>{t('真实组件，实时主题', 'Real components, live theme')}</h3>
+            <p>
+              {t(
+                '基于 TDesign React · 状态色沿用官方默认值',
+                'Built with TDesign React · Status colors retain official defaults',
+              )}
+            </p>
           </div>
           <div className="preview-switches">
             <Radio.Group
-              aria-label="预览内容"
+              aria-label={t('预览内容', 'Preview content')}
               size="medium"
               theme="button"
               variant="default-filled"
@@ -443,12 +528,12 @@ export function Preview({ theme }: { theme: ColorThemeResult }) {
                 updateUrlParams({ scene: value === 'components' ? null : value });
               }}
               options={[
-                { label: '组件状态', value: 'components' },
-                { label: '业务场景', value: 'business' },
+                { label: t('组件状态', 'Components'), value: 'components' },
+                { label: t('业务场景', 'Business scenario'), value: 'business' },
               ]}
             />
             <Radio.Group
-              aria-label="预览主题模式"
+              aria-label={t('预览主题模式', 'Preview theme mode')}
               size="medium"
               theme="button"
               variant="default-filled"
@@ -459,9 +544,9 @@ export function Preview({ theme }: { theme: ColorThemeResult }) {
                 updateUrlParams({ previewMode: value === 'both' ? null : value });
               }}
               options={[
-                { label: '浅色', value: 'light' },
-                { label: '深色', value: 'dark' },
-                { label: '并排', value: 'both' },
+                { label: t('浅色', 'Light'), value: 'light' },
+                { label: t('深色', 'Dark'), value: 'dark' },
+                { label: t('并排', 'Side by side'), value: 'both' },
               ]}
             />
           </div>

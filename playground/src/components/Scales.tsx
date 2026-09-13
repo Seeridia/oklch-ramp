@@ -1,21 +1,29 @@
 import { useEffect, useRef, useState } from 'react';
 import { Button, Card, Radio, Tag, Tooltip, MessagePlugin } from 'tdesign-react';
 import { CopyIcon, InfoCircleIcon, CheckIcon } from 'tdesign-icons-react';
-import { chooseContrastingForeground, type ColorScaleResult, type ColorStop } from 'oklch-ramp';
+import { chooseContrastingForeground, type ColorScaleResult, type ColorStop } from 'okramp';
 import { displayColor, type DisplayFormat, type Generated } from '../model';
+import { currentLocale, useI18n } from '../i18n';
 export async function copyText(value: string) {
+  const isZh = currentLocale() === 'zh-CN';
   try {
     await navigator.clipboard.writeText(value);
-    await MessagePlugin.success('已复制到剪贴板');
+    await MessagePlugin.success(isZh ? '已复制到剪贴板' : 'Copied to clipboard');
   } catch {
-    await MessagePlugin.error('复制失败，请在导出面板中手动选择并复制');
+    await MessagePlugin.error(
+      isZh
+        ? '复制失败，请在导出面板中手动选择并复制'
+        : 'Copy failed. Select and copy the value manually.',
+    );
   }
 }
-export function CopyButton({ value, label = '复制颜色值' }: { value: string; label?: string }) {
+export function CopyButton({ value, label }: { value: string; label?: string }) {
+  const { t } = useI18n();
+  const accessibleLabel = label ?? t('复制颜色值', 'Copy color value');
   return (
-    <Tooltip content={label}>
+    <Tooltip content={accessibleLabel}>
       <Button
-        aria-label={label}
+        aria-label={accessibleLabel}
         variant="text"
         shape="square"
         size="small"
@@ -38,6 +46,7 @@ export function ScaleStrip({
   compact?: boolean;
   format?: DisplayFormat;
 }) {
+  const { t } = useI18n();
   const stripRef = useRef<HTMLDivElement>(null);
   const [overflowing, setOverflowing] = useState(false);
   const activeIndex =
@@ -75,7 +84,10 @@ export function ScaleStrip({
           type="button"
           className={`scale-stop ${activeIndex === stop.index ? 'selected' : ''}`}
           key={stop.index}
-          aria-label={`第 ${stop.label} 阶 ${stop.color}`}
+          aria-label={t('第 {label} 阶 {color}', 'Stop {label}: {color}', {
+            label: stop.label,
+            color: stop.color,
+          })}
           aria-pressed={activeIndex === stop.index}
           onClick={() =>
             onSelect ? onSelect(stop.index) : void copyText(displayColor(stop.color, format))
@@ -101,9 +113,9 @@ export function ScaleStrip({
               <code>{displayColor(stop.color, format)}</code>
               <small>
                 {result.anchorIndex === stop.index
-                  ? '输入色'
+                  ? t('输入色', 'Seed color')
                   : result.recommendedIndex === stop.index
-                    ? '推荐主色'
+                    ? t('推荐主色', 'Recommended color')
                     : `L ${stop.oklch.l.toFixed(2)}`}
               </small>
             </span>
@@ -114,24 +126,25 @@ export function ScaleStrip({
   );
 }
 function Inspector({ stop, kind }: { stop: ColorStop; kind: string }) {
+  const { t } = useI18n();
   return (
     <Card className="inspector-card" bordered={false}>
       <div className="inspector-heading">
         <div>
-          <span className="eyebrow">COLOR INSPECTOR</span>
+          <span className="eyebrow">{t('颜色检查器', 'COLOR INSPECTOR')}</span>
           <h3>
-            色彩详情{' '}
+            {t('色彩详情', 'Color details')}{' '}
             <span>
-              {kind} · 第 {stop.label} 阶
+              {kind} · {t('第 {label} 阶', 'Stop {label}', { label: stop.label })}
             </span>
           </h3>
         </div>
         <Tag variant="light" theme={stop.source === 'seed' ? 'primary' : 'default'}>
           {stop.source === 'seed'
-            ? '输入色'
+            ? t('输入色', 'Seed color')
             : stop.source === 'gamut-mapped'
-              ? '色域映射'
-              : '算法生成'}
+              ? t('色域映射', 'Gamut mapped')
+              : t('算法生成', 'Generated')}
         </Tag>
       </div>
       <div className="inspector-body">
@@ -149,22 +162,22 @@ function Inspector({ stop, kind }: { stop: ColorStop; kind: string }) {
               <code>{displayColor(stop.color, format)}</code>
               <CopyButton
                 value={displayColor(stop.color, format)}
-                label={`复制 ${format.toUpperCase()}`}
+                label={t('复制 {format}', 'Copy {format}', { format: format.toUpperCase() })}
               />
             </div>
           ))}
         </div>
         <div className="color-metrics">
           <div>
-            <span>明度 L</span>
+            <span>{t('明度 L', 'Lightness L')}</span>
             <strong>{stop.oklch.l.toFixed(3)}</strong>
           </div>
           <div>
-            <span>彩度 C</span>
+            <span>{t('彩度 C', 'Chroma C')}</span>
             <strong>{stop.oklch.c.toFixed(3)}</strong>
           </div>
           <div>
-            <span>色相 H</span>
+            <span>{t('色相 H', 'Hue H')}</span>
             <strong>{stop.oklch.h === null ? '—' : `${stop.oklch.h.toFixed(1)}°`}</strong>
           </div>
         </div>
@@ -181,6 +194,7 @@ export function Scales({
   format: DisplayFormat;
   onFormat: (format: DisplayFormat) => void;
 }) {
+  const { t } = useI18n();
   const [selected, setSelected] = useState({ kind: 'brand', index: result.scale.recommendedIndex });
   const selectedScale = selected.kind === 'brand' ? result.scale : result.neutral;
   const stop = selectedScale.stops[Math.min(selected.index, selectedScale.stops.length - 1)];
@@ -191,15 +205,20 @@ export function Scales({
           <div className="section-heading">
             <div>
               <h3>
-                品牌色阶{' '}
+                {t('品牌色阶', 'Brand scale')}{' '}
                 <Tag size="small" variant="light">
-                  {result.scale.stops.length} 阶
+                  {t('{count} 阶', '{count} stops', { count: result.scale.stops.length })}
                 </Tag>
               </h3>
-              <p>从浅到深，构建有层次的品牌表达</p>
+              <p>
+                {t(
+                  '从浅到深，构建有层次的品牌表达',
+                  'Build a layered brand expression from light to dark',
+                )}
+              </p>
             </div>
             <Radio.Group
-              aria-label="颜色显示格式"
+              aria-label={t('颜色显示格式', 'Color display format')}
               theme="button"
               size="small"
               variant="default-filled"
@@ -220,17 +239,25 @@ export function Scales({
               format={format}
             />
           </div>
-          <p className="scale-scroll-hint brand-scale-hint">左右滑动查看更多色阶</p>
-          <p className="scale-density-note">紧凑显示 · 点击色块在详情中查看完整颜色值</p>
+          <p className="scale-scroll-hint brand-scale-hint">
+            {t('左右滑动查看更多色阶', 'Scroll horizontally to see more stops')}
+          </p>
+          <p className="scale-density-note">
+            {t(
+              '紧凑显示 · 点击色块在详情中查看完整颜色值',
+              'Compact view · Select a swatch to inspect its full value',
+            )}
+          </p>
           <div className="palette-legend">
             <span>
-              <i>A</i> 输入色锚点
+              <i>A</i> {t('输入色锚点', 'Seed anchor')}
             </span>
             <span>
-              <i>R</i> 推荐主色
+              <i>R</i> {t('推荐主色', 'Recommended color')}
             </span>
             <span className="legend-note">
-              <InfoCircleIcon aria-hidden="true" /> 点击色块查看详情
+              <InfoCircleIcon aria-hidden="true" />{' '}
+              {t('点击色块查看详情', 'Select a swatch for details')}
             </span>
           </div>
         </Card>
@@ -238,16 +265,21 @@ export function Scales({
           <div className="section-heading">
             <div>
               <h3>
-                品牌关联中性色{' '}
+                {t('品牌关联中性色', 'Brand-tinted neutrals')}{' '}
                 <Tag size="small" variant="light">
-                  {result.neutral.stops.length} 阶
+                  {t('{count} 阶', '{count} stops', { count: result.neutral.stops.length })}
                 </Tag>
               </h3>
-              <p>轻微融入品牌色相，用于背景、文字与边框</p>
+              <p>
+                {t(
+                  '轻微融入品牌色相，用于背景、文字与边框',
+                  'Subtly tinted neutrals for surfaces, text, and borders',
+                )}
+              </p>
             </div>
             <CopyButton
               value={result.neutral.colors.map((color) => displayColor(color, format)).join(', ')}
-              label="复制中性色阶"
+              label={t('复制中性色阶', 'Copy neutral scale')}
             />
           </div>
           <div className="scale-scroll-shell neutral-scale-scroll">
@@ -259,15 +291,22 @@ export function Scales({
               compact
             />
           </div>
-          <p className="scale-scroll-hint neutral-scale-hint">左右滑动查看更多色阶</p>
+          <p className="scale-scroll-hint neutral-scale-hint">
+            {t('左右滑动查看更多色阶', 'Scroll horizontally to see more stops')}
+          </p>
           <div className="neutral-labels">
-            <span>浅色背景</span>
-            <span>边框与辅助元素</span>
-            <span>深色文字</span>
+            <span>{t('浅色背景', 'Light surfaces')}</span>
+            <span>{t('边框与辅助元素', 'Borders and supporting UI')}</span>
+            <span>{t('深色文字', 'Dark text')}</span>
           </div>
         </Card>
       </div>
-      {stop && <Inspector stop={stop} kind={selected.kind === 'brand' ? '品牌色' : '中性色'} />}
+      {stop && (
+        <Inspector
+          stop={stop}
+          kind={selected.kind === 'brand' ? t('品牌色', 'Brand') : t('中性色', 'Neutral')}
+        />
+      )}
     </div>
   );
 }

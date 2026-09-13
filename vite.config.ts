@@ -12,7 +12,10 @@ export default defineConfig({
     sourcemap: true,
   },
   test: {
-    alias: { 'oklch-ramp': fileURLToPath(new URL('./src/index.ts', import.meta.url)) },
+    alias: {
+      'okramp-tdesign': fileURLToPath(new URL('./packages/tdesign/src/index.ts', import.meta.url)),
+      okramp: fileURLToPath(new URL('./src/index.ts', import.meta.url)),
+    },
     include: ['tests/**/*.test.ts'],
     environment: 'node',
     coverage: {

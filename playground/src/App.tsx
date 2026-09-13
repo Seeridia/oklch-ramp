@@ -44,13 +44,10 @@ import { createExport, type ExportFormat, type ExportMode, type ExportTarget } f
 import { toTDesignTheme } from './adapters/tdesign';
 import { readUrlParam, updateUrlParams, urlWithParams } from './url-state';
 import { readSettings, writeSettings } from './settings-url';
+import { localizeEngineError, useI18n } from './i18n';
+import enUS from 'tdesign-react/es/locale/en_US';
 
-const NAV = [
-  { value: 'workspace', label: '色彩工作台', icon: <AppIcon aria-hidden="true" /> },
-  { value: 'compare', label: '方案对比', icon: <ChartBarIcon aria-hidden="true" /> },
-  { value: 'guide', label: '使用指南', icon: <BookOpenIcon aria-hidden="true" /> },
-];
-const PAGES = new Set(NAV.map((item) => item.value));
+const PAGES = new Set(['workspace', 'compare', 'guide']);
 const TABS = new Set(['scale', 'preview', 'tokens', 'diagnostics']);
 function initialMode(): 'light' | 'dark' {
   try {
@@ -63,6 +60,24 @@ function initialMode(): 'light' | 'dark' {
   }
 }
 export function App() {
+  const { locale, isZh, setLocale, t } = useI18n();
+  const NAV = [
+    {
+      value: 'workspace',
+      label: t('色彩工作台', 'Color workspace'),
+      icon: <AppIcon aria-hidden="true" />,
+    },
+    {
+      value: 'compare',
+      label: t('方案对比', 'Method comparison'),
+      icon: <ChartBarIcon aria-hidden="true" />,
+    },
+    {
+      value: 'guide',
+      label: t('使用指南', 'Documentation'),
+      icon: <BookOpenIcon aria-hidden="true" />,
+    },
+  ];
   const [settings, storeSettings] = useState<Settings>(() => readSettings('workspace'));
   const setSettings = (next: Settings) => {
     storeSettings(next);
@@ -80,6 +95,7 @@ export function App() {
     if (attempt.result) setLastValid(attempt.result);
   }, [attempt.result]);
   const result = attempt.result ?? lastValid;
+  const generationError = localizeEngineError(attempt.error, locale);
   const [page, setPage] = useState(() => {
     const value = readUrlParam('page', 'workspace');
     return PAGES.has(value) ? value : 'workspace';
@@ -99,6 +115,7 @@ export function App() {
     }
   }, [comparisonSettings]);
   const [lastComparison, setLastComparison] = useState(() => generateComparison(DEFAULTS));
+  const comparisonError = localizeEngineError(comparisonAttempt.error, locale);
   useEffect(() => {
     if (comparisonAttempt.result) setLastComparison(comparisonAttempt.result);
   }, [comparisonAttempt.result]);
@@ -168,8 +185,8 @@ export function App() {
   }, [applyToShell, result.theme, uiMode]);
   useEffect(() => {
     if (page !== 'guide')
-      document.title = `${NAV.find((item) => item.value === page)?.label ?? '色彩工作台'} · OKRamp`;
-  }, [page]);
+      document.title = `${NAV.find((item) => item.value === page)?.label ?? t('色彩工作台', 'Color workspace')} · OKRamp`;
+  }, [locale, page]);
   const messages = result.theme?.diagnostics.messages ?? result.scale.diagnostics.messages;
   const warningCount = messages.filter((m) => m.severity !== 'info').length;
   const exportDisabled =
@@ -226,9 +243,9 @@ export function App() {
     window.setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
   return (
-    <ConfigProvider globalConfig={{}}>
+    <ConfigProvider globalConfig={isZh ? {} : enUS}>
       <a className="skip-link" href="#main-content">
-        跳到主要内容
+        {t('跳到主要内容', 'Skip to main content')}
       </a>
       <Layout className={`app-shell ${collapsed ? 'nav-collapsed' : ''}`}>
         <Layout.Aside width={collapsed ? '64px' : '208px'} className="app-sidebar">
@@ -240,7 +257,7 @@ export function App() {
               e.preventDefault();
               openWorkspace();
             }}
-            aria-label="OKRamp 首页"
+            aria-label={t('OKRamp 首页', 'OKRamp home')}
           >
             <span className="brand-icon">
               <LayersIcon aria-hidden="true" />
@@ -252,7 +269,11 @@ export function App() {
             <Button
               variant="text"
               shape="square"
-              aria-label={collapsed ? '展开导航' : '折叠导航'}
+              aria-label={
+                collapsed
+                  ? t('展开导航', 'Expand navigation')
+                  : t('折叠导航', 'Collapse navigation')
+              }
               icon={
                 collapsed ? (
                   <MenuUnfoldIcon aria-hidden="true" />
@@ -271,13 +292,13 @@ export function App() {
                 className="mobile-menu"
                 shape="square"
                 variant="text"
-                aria-label="打开导航"
+                aria-label={t('打开导航', 'Open navigation')}
                 icon={<MenuUnfoldIcon aria-hidden="true" />}
                 onClick={() => setMobileNav(true)}
               />
               <Breadcrumb
                 options={[
-                  { content: '设计工具' },
+                  { content: t('设计工具', 'Design tools') },
                   { content: NAV.find((n) => n.value === page)?.label },
                 ]}
               />
@@ -286,19 +307,39 @@ export function App() {
               <Tag variant="light" className="header-version">
                 OKRAMP
               </Tag>
-              <Tooltip content="查看源码">
+              <Tooltip content={t('查看源码', 'View source')}>
                 <Button
-                  aria-label="查看源码"
+                  aria-label={t('查看源码', 'View source')}
                   variant="text"
                   shape="square"
                   icon={<LogoGithubIcon aria-hidden="true" />}
-                  href="https://github.com/Seeridia/oklch-ramp"
+                  href="https://github.com/Seeridia/okramp"
                   target="_blank"
                 />
               </Tooltip>
-              <Tooltip content={uiMode === 'light' ? '切换深色界面' : '切换浅色界面'}>
+              <Tooltip content={t('切换为英文', 'Switch to Chinese')}>
                 <Button
-                  aria-label={uiMode === 'light' ? '切换深色界面' : '切换浅色界面'}
+                  className="language-switch"
+                  aria-label={t('切换为英文', 'Switch to Chinese')}
+                  variant="text"
+                  onClick={() => setLocale(isZh ? 'en-US' : 'zh-CN')}
+                >
+                  {isZh ? 'EN' : '中文'}
+                </Button>
+              </Tooltip>
+              <Tooltip
+                content={
+                  uiMode === 'light'
+                    ? t('切换深色界面', 'Switch to dark mode')
+                    : t('切换浅色界面', 'Switch to light mode')
+                }
+              >
+                <Button
+                  aria-label={
+                    uiMode === 'light'
+                      ? t('切换深色界面', 'Switch to dark mode')
+                      : t('切换浅色界面', 'Switch to light mode')
+                  }
                   variant="text"
                   shape="square"
                   icon={
@@ -320,10 +361,19 @@ export function App() {
                   <h1>{NAV.find((n) => n.value === page)?.label}</h1>
                   <p>
                     {page === 'workspace'
-                      ? '从一个主色，构建协调、可用的色彩主题。'
+                      ? t(
+                          '从一个主色，构建协调、可用的色彩主题。',
+                          'Build a coherent, usable color theme from one seed color.',
+                        )
                       : page === 'compare'
-                        ? '相同的主色，对比不同颜色空间的生成效果。'
-                        : '了解色彩策略，把设计带入代码。'}
+                        ? t(
+                            '相同的主色，对比不同颜色空间的生成效果。',
+                            'Compare generation methods using the same seed color.',
+                          )
+                        : t(
+                            '了解色彩策略，把设计带入代码。',
+                            'Understand the color system and bring it into code.',
+                          )}
                   </p>
                 </div>
                 {page !== 'guide' && (
@@ -336,7 +386,7 @@ export function App() {
                         icon={<SettingIcon aria-hidden="true" />}
                         onClick={() => setControlsOpen(true)}
                       >
-                        参数
+                        {t('参数', 'Settings')}
                       </Button>
                     )}
                     <Button
@@ -352,7 +402,7 @@ export function App() {
                         setApplyToShell(true);
                       }}
                     >
-                      恢复默认
+                      {t('恢复默认', 'Reset')}
                     </Button>
                     {page === 'workspace' && (
                       <Button
@@ -361,7 +411,7 @@ export function App() {
                         disabled={Boolean(attempt.error)}
                         onClick={() => setExportOpen(true)}
                       >
-                        导出主题
+                        {t('导出主题', 'Export theme')}
                       </Button>
                     )}
                   </Space>
@@ -372,8 +422,11 @@ export function App() {
               <Alert
                 className="generation-error"
                 theme="error"
-                title="当前配置生成失败，正在展示上次有效结果"
-                message={`${attempt.error} 请修改参数后重试；导出已暂停。`}
+                title={t(
+                  '当前配置生成失败，正在展示上次有效结果',
+                  'Generation failed; showing the last valid result',
+                )}
+                message={`${generationError} ${t('请修改参数后重试；导出已暂停。', 'Change the settings and try again. Export is paused.')}`}
               />
             )}
             {page === 'guide' ? (
@@ -382,7 +435,7 @@ export function App() {
               <div className={`workspace-grid ${page === 'compare' ? 'compare-workspace' : ''}`}>
                 {page === 'workspace' && (
                   <Card className="control-card" bordered={false}>
-                    <Controls settings={settings} onChange={setSettings} error={attempt.error} />
+                    <Controls settings={settings} onChange={setSettings} error={generationError} />
                   </Card>
                 )}
                 <div className="result-area">
@@ -391,14 +444,14 @@ export function App() {
                       {comparisonAttempt.error && (
                         <Alert
                           theme="error"
-                          message={`${comparisonAttempt.error} 正在展示上次有效结果。`}
+                          message={`${comparisonError} ${t('正在展示上次有效结果。', 'Showing the last valid result.')}`}
                         />
                       )}
                       <Comparison
                         result={comparisonAttempt.result ?? lastComparison}
                         settings={comparisonSettings}
                         onChange={setComparisonSettings}
-                        error={comparisonAttempt.error}
+                        error={comparisonError}
                       />
                     </>
                   ) : (
@@ -410,7 +463,7 @@ export function App() {
                             label={
                               <span className="tab-label">
                                 <LayersIcon aria-hidden="true" />
-                                色阶
+                                {t('色阶', 'Scales')}
                               </span>
                             }
                           />
@@ -419,7 +472,7 @@ export function App() {
                             label={
                               <span className="tab-label">
                                 <AppIcon aria-hidden="true" />
-                                组件预览
+                                {t('组件预览', 'Preview')}
                               </span>
                             }
                           />
@@ -437,14 +490,15 @@ export function App() {
                             label={
                               <span className="tab-label">
                                 <CheckCircleIcon aria-hidden="true" />
-                                诊断{warningCount > 0 && <Badge count={warningCount} />}
+                                {t('诊断', 'Diagnostics')}
+                                {warningCount > 0 && <Badge count={warningCount} />}
                               </span>
                             }
                           />
                         </Tabs>
                         <span className="live-indicator">
                           <span className="status-dot" />
-                          实时生成
+                          {t('实时生成', 'Live')}
                         </span>
                       </div>
                       {tab === 'scale' && (
@@ -452,12 +506,17 @@ export function App() {
                       )}
                       {(tab === 'preview' || tab === 'tokens') && !result.theme && (
                         <Card bordered={false}>
-                          <Empty description="主题需要至少 10 阶品牌色" />
+                          <Empty
+                            description={t(
+                              '主题需要至少 10 阶品牌色',
+                              'Themes require at least 10 brand stops',
+                            )}
+                          />
                           <Button
                             theme="primary"
                             onClick={() => setSettings({ ...settings, steps: 10 })}
                           >
-                            切换为 10 阶并生成主题
+                            {t('切换为 10 阶并生成主题', 'Use 10 stops and generate theme')}
                           </Button>
                         </Card>
                       )}
@@ -465,9 +524,14 @@ export function App() {
                         <>
                           <div className="apply-theme">
                             <Checkbox checked={applyToShell} onChange={setApplyToShell}>
-                              同时应用到工作台
+                              {t('同时应用到工作台', 'Apply to workspace')}
                             </Checkbox>
-                            <span>界面明暗模式仍由右上角控制</span>
+                            <span>
+                              {t(
+                                '界面明暗模式仍由右上角控制',
+                                'Use the top-right control to change interface mode',
+                              )}
+                            </span>
                           </div>
                           <Preview theme={result.theme} />
                         </>
@@ -481,9 +545,14 @@ export function App() {
             )}
             <footer className="site-footer">
               <span>OKRamp</span>
-              <span>用感知一致的颜色，连接设计与开发。</span>
+              <span>
+                {t(
+                  '用感知一致的颜色，连接设计与开发。',
+                  'Connect design and development with perceptually consistent color.',
+                )}
+              </span>
               <a href="https://tdesign.tencent.com/starter/react/" target="_blank" rel="noreferrer">
-                TDesign Starter 布局参考
+                {t('TDesign Starter 布局参考', 'Layout inspired by TDesign Starter')}
               </a>
             </footer>
           </Layout.Content>
@@ -494,7 +563,7 @@ export function App() {
               theme="default"
               variant="text"
               shape="square"
-              aria-label="关闭面板"
+              aria-label={t('关闭面板', 'Close panel')}
               icon={<CloseIcon aria-hidden="true" />}
             />
           }
@@ -513,17 +582,17 @@ export function App() {
               theme="default"
               variant="text"
               shape="square"
-              aria-label="关闭面板"
+              aria-label={t('关闭面板', 'Close panel')}
               icon={<CloseIcon aria-hidden="true" />}
             />
           }
           visible={controlsOpen}
-          header="生成设置"
+          header={t('生成设置', 'Generation settings')}
           size="min(340px, 100vw)"
           footer={false}
           onClose={() => setControlsOpen(false)}
         >
-          <Controls settings={settings} onChange={setSettings} error={attempt.error} />
+          <Controls settings={settings} onChange={setSettings} error={generationError} />
         </Drawer>
         <Drawer
           closeBtn={
@@ -531,18 +600,18 @@ export function App() {
               theme="default"
               variant="text"
               shape="square"
-              aria-label="关闭面板"
+              aria-label={t('关闭面板', 'Close panel')}
               icon={<CloseIcon aria-hidden="true" />}
             />
           }
           visible={exportOpen}
-          header="导出主题"
+          header={t('导出主题', 'Export theme')}
           size="min(620px, 100vw)"
           onClose={() => setExportOpen(false)}
           footer={
             <Space>
               <Button onClick={() => void copyText(exportValue)} disabled={exportDisabled}>
-                复制代码
+                {t('复制代码', 'Copy code')}
               </Button>
               <Button
                 theme="primary"
@@ -550,41 +619,41 @@ export function App() {
                 onClick={download}
                 disabled={exportDisabled}
               >
-                下载文件
+                {t('下载文件', 'Download')}
               </Button>
             </Space>
           }
         >
           <div className="export-options">
-            <Field label="导出目标">
+            <Field label={t('导出目标', 'Export target')}>
               <Radio.Group
-                aria-label="导出目标"
+                aria-label={t('导出目标', 'Export target')}
                 theme="button"
                 variant="default-filled"
                 value={exportTarget}
                 onChange={(v) => setExportTarget(v as ExportTarget)}
                 options={[
-                  { label: 'TDesign 主题', value: 'tdesign' },
-                  { label: '通用颜色', value: 'generic' },
+                  { label: t('TDesign 主题', 'TDesign theme'), value: 'tdesign' },
+                  { label: t('通用颜色', 'Generic colors'), value: 'generic' },
                 ]}
               />
             </Field>
             <div className="export-row">
-              <Field label="主题范围">
+              <Field label={t('主题范围', 'Theme modes')}>
                 <Select
-                  aria-label="主题范围"
+                  aria-label={t('主题范围', 'Theme modes')}
                   value={exportMode}
                   onChange={(v) => setExportMode(v as ExportMode)}
                   options={[
-                    { label: '浅色 + 深色', value: 'both' },
-                    { label: '仅浅色', value: 'light' },
-                    { label: '仅深色', value: 'dark' },
+                    { label: t('浅色 + 深色', 'Light + dark'), value: 'both' },
+                    { label: t('仅浅色', 'Light only'), value: 'light' },
+                    { label: t('仅深色', 'Dark only'), value: 'dark' },
                   ]}
                 />
               </Field>
-              <Field label="颜色格式">
+              <Field label={t('颜色格式', 'Color format')}>
                 <Select
-                  aria-label="颜色格式"
+                  aria-label={t('颜色格式', 'Color format')}
                   value={format}
                   onChange={(v) => setFormat(v as DisplayFormat)}
                   options={['hex', 'rgb', 'oklch'].map((v) => ({
@@ -594,26 +663,33 @@ export function App() {
                 />
               </Field>
             </div>
-            <Field label="内容范围">
+            <Field label={t('内容范围', 'Content')}>
               <Checkbox.Group
-                aria-label="内容范围"
+                aria-label={t('内容范围', 'Content')}
                 value={sections}
                 onChange={(values) => setSections(values.map(String))}
                 options={[
-                  { label: '品牌色阶', value: 'brand' },
-                  { label: '中性色阶', value: 'neutral' },
-                  { label: '语义 Token', value: 'semantic', disabled: !result.theme },
+                  { label: t('品牌色阶', 'Brand scale'), value: 'brand' },
+                  { label: t('中性色阶', 'Neutral scale'), value: 'neutral' },
+                  {
+                    label: t('语义 Token', 'Semantic tokens'),
+                    value: 'semantic',
+                    disabled: !result.theme,
+                  },
                 ]}
               />
             </Field>
             {exportTarget === 'tdesign' && sections.includes('semantic') && (
               <p className="field-hint">
-                语义 Token 使用变量引用；自动包含依赖的基础色阶与调整色，确保导出可独立使用。
+                {t(
+                  '语义 Token 使用变量引用；自动包含依赖的基础色阶与调整色，确保导出可独立使用。',
+                  'Semantic tokens use variable references. Required palettes and adjusted colors are included automatically.',
+                )}
               </p>
             )}
-            <Field label="文件格式">
+            <Field label={t('文件格式', 'File format')}>
               <Radio.Group
-                aria-label="文件格式"
+                aria-label={t('文件格式', 'File format')}
                 theme="button"
                 variant="default-filled"
                 value={exportFormat}
@@ -629,14 +705,19 @@ export function App() {
           {!result.theme && (
             <Alert
               theme="warning"
-              message="当前仅生成原始色阶。TDesign 主题需要至少 10 阶品牌色。"
+              message={t(
+                '当前仅生成原始色阶。TDesign 主题需要至少 10 阶品牌色。',
+                'Only raw scales are available. A TDesign theme requires at least 10 brand stops.',
+              )}
             />
           )}
           <div className="export-code-header">
             <span>
               okramp-theme-{exportTarget}.{exportFormat === 'typescript' ? 'ts' : exportFormat}
             </span>
-            <Tag size="small">{exportValue.split('\n').length} 行</Tag>
+            <Tag size="small">
+              {t('{count} 行', '{count} lines', { count: exportValue.split('\n').length })}
+            </Tag>
           </div>
           <pre className="code-block export-code" tabIndex={0}>
             {exportValue}
@@ -645,8 +726,14 @@ export function App() {
             theme="info"
             message={
               exportTarget === 'tdesign'
-                ? 'CSS 请在 TDesign 样式之后加载。深色模式设置根元素 theme-mode="dark"；成功、警告与错误色使用官方默认值。'
-                : '通用 Token 不依赖组件库，可用于自己的设计系统。'
+                ? t(
+                    'CSS 请在 TDesign 样式之后加载。深色模式设置根元素 theme-mode="dark"；成功、警告与错误色使用官方默认值。',
+                    'Load the CSS after TDesign styles. Set theme-mode="dark" on the root element for dark mode. Status colors retain TDesign defaults.',
+                  )
+                : t(
+                    '通用 Token 不依赖组件库，可用于自己的设计系统。',
+                    'Generic tokens are framework-independent and can be used in your own design system.',
+                  )
             }
           />
         </Drawer>

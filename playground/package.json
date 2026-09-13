@@ -14,12 +14,13 @@
     "@ant-design/colors": "8.0.1",
     "culori": "4.0.2",
     "highlight.js": "11.11.1",
-    "oklch-ramp": "workspace:*",
+    "okramp": "workspace:*",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "tdesign-icons-react": "0.6.11",
     "tdesign-react": "1.18.3",
-    "tvision-color": "1.6.0"
+    "tvision-color": "1.6.0",
+    "okramp-tdesign": "workspace:*"
   },
   "devDependencies": {
     "@types/culori": "4.0.1",
