@@ -1,7 +1,7 @@
 # okramp-tdesign
 
 TDesign React 主题适配包，基于 OKRamp 的品牌与中性色阶生成语义变量。
-当前为 workspace 包，尚待首次 npm 发布。
+已发布到 npm：`npm install okramp okramp-tdesign`。
 
 ```ts
 import { generateColorTheme } from 'okramp';
