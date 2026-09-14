@@ -1,6 +1,13 @@
 * {
   box-sizing: border-box;
 }
+:root {
+  --td-radius-small: 4px;
+  --td-radius-default: 6px;
+  --td-radius-medium: 10px;
+  --td-radius-large: 14px;
+  --td-radius-extraLarge: 18px;
+}
 body {
   margin: 0;
   font-family:
@@ -432,10 +439,10 @@ h1 {
   font-weight: 500;
 }
 .scale-stop:first-child .color-block {
-  border-radius: 5px 0 0 5px;
+  border-radius: var(--td-radius-default) 0 0 var(--td-radius-default);
 }
 .scale-stop:last-child .color-block {
-  border-radius: 0 5px 5px 0;
+  border-radius: 0 var(--td-radius-default) var(--td-radius-default) 0;
 }
 .scale-stop:focus-visible .color-block {
   outline: 2px dashed currentColor;
@@ -455,7 +462,7 @@ h1 {
   display: inline-flex;
   font-size: var(--td-font-size-body-small);
   border: 1px solid currentColor;
-  border-radius: 3px;
+  border-radius: var(--td-radius-small);
   padding: 0 3px;
   line-height: 14px;
 }
@@ -493,7 +500,7 @@ h1 {
   font-size: var(--td-font-size-body-small);
   border: 1px solid var(--td-component-stroke);
   padding: 0 3px;
-  border-radius: 3px;
+  border-radius: var(--td-radius-small);
 }
 .legend-note {
   margin-left: auto;
@@ -537,7 +544,7 @@ h1 {
   align-items: stretch;
 }
 .inspector-swatch {
-  border-radius: 5px;
+  border-radius: var(--td-radius-default);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -659,7 +666,7 @@ h1 {
   align-items: center;
   gap: 6px;
   font-size: var(--td-font-size-body-small);
-  border-radius: 6px 6px 0 0;
+  border-radius: var(--td-radius-medium) var(--td-radius-medium) 0 0;
 }
 .preview-frame-label span {
   font-size: var(--td-font-size-body-small);
@@ -670,7 +677,7 @@ h1 {
 .preview-canvas {
   background: var(--td-bg-color-page);
   color: var(--td-text-color-primary);
-  border-radius: 0 0 6px 6px;
+  border-radius: 0 0 var(--td-radius-medium) var(--td-radius-medium);
   padding: 20px;
   min-height: 620px;
 }
@@ -692,7 +699,7 @@ h1 {
 .business-scene {
   padding: 16px;
   background: var(--td-bg-color-container);
-  border-radius: 5px;
+  border-radius: var(--td-radius-default);
 }
 .component-gallery section + section {
   margin-top: 24px;
@@ -779,7 +786,7 @@ h1 {
 .token-value > i {
   width: 16px;
   height: 16px;
-  border-radius: 3px;
+  border-radius: var(--td-radius-small);
   border: 1px solid rgba(128, 128, 128, 0.25);
 }
 .token-footnote {
@@ -1370,7 +1377,7 @@ h1 {
 .code-block {
   background: var(--td-bg-color-page);
   border: 1px solid var(--td-component-stroke);
-  border-radius: 5px;
+  border-radius: var(--td-radius-default);
   padding: 16px;
   font-size: var(--td-font-size-body-small);
   line-height: 1.9;
