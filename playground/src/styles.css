@@ -87,9 +87,12 @@ h3 {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--td-brand-color);
-  font-size: 29px;
   flex-shrink: 0;
+}
+.brand-icon img {
+  display: block;
+  width: 30px;
+  height: 30px;
 }
 .app-sidebar .t-menu {
   flex: 1;

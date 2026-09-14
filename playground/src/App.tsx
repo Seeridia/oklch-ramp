@@ -46,6 +46,7 @@ import { readUrlParam, updateUrlParams, urlWithParams } from './url-state';
 import { readSettings, writeSettings } from './settings-url';
 import { localizeEngineError, useI18n } from './i18n';
 import enUS from 'tdesign-react/es/locale/en_US';
+import okrampLogo from './assets/okramp-logo.svg';
 
 const PAGES = new Set(['workspace', 'compare', 'guide']);
 const TABS = new Set(['scale', 'preview', 'tokens', 'diagnostics']);
@@ -260,7 +261,7 @@ export function App() {
             aria-label={t('OKRamp 首页', 'OKRamp home')}
           >
             <span className="brand-icon">
-              <LayersIcon aria-hidden="true" />
+              <img src={okrampLogo} alt="" aria-hidden="true" />
             </span>
             {!collapsed && <span>OKRamp</span>}
           </a>
