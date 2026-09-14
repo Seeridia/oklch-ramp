@@ -78,8 +78,7 @@ h3 {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-left: -24px;
-  padding: 0 20px;
+  padding: 0 60px 0px 10px;
   color: var(--td-text-color-primary);
   font-size: 19px;
   font-weight: 650;
@@ -96,8 +95,21 @@ h3 {
 }
 .brand-icon img {
   display: block;
-  width: 30px;
-  height: 30px;
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+.brand-word {
+  display: flex;
+  align-items: center;
+}
+.brand-word img {
+  display: block;
+  width: auto;
+  height: 20px;
+}
+[theme-mode='dark'] .brand-word img {
+  filter: invert(1);
 }
 .app-sidebar .t-menu {
   flex: 1;
