@@ -72,7 +72,7 @@ h3 {
   flex-direction: column;
 }
 .brand-logo {
-  width: var(--rail-width);
+  width: auto;
   height: var(--td-comp-size-xxxl);
   min-height: var(--td-comp-size-xxxl);
   display: flex;
@@ -85,7 +85,6 @@ h3 {
   font-weight: 650;
   white-space: nowrap;
   letter-spacing: -0.5px;
-  border-right: 1px solid var(--td-component-stroke);
   overflow: hidden;
   flex-shrink: 0;
 }
@@ -144,9 +143,6 @@ h3 {
   gap: 8px;
   min-width: 0;
   flex: 1;
-}
-.nav-collapsed .brand-word {
-  display: none;
 }
 .header-actions > .t-space-item {
   display: flex;
@@ -1498,9 +1494,6 @@ h1 {
   .app-sidebar.t-layout__sider {
     width: 64px !important;
   }
-  .brand-word {
-    display: none;
-  }
   .app-sidebar .t-menu__content {
     padding: 8px;
   }
@@ -1567,6 +1560,9 @@ h1 {
     width: auto;
     margin-left: -16px;
     padding: 0 16px;
+  }
+  .brand-word {
+    display: none;
   }
   .header-context .t-breadcrumb {
     display: none;
