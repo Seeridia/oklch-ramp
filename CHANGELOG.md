@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.1
+
+- docs: readme ([78fe13d](https://github.com/Seeridia/okramp/commit/78fe13d768f60280c32b2f952bbaf686d394d402))
+
 ## 0.4.0
 
 - docs: reorganize guides and refresh open source documentation ([315a17d](https://github.com/Seeridia/okramp/commit/315a17d2c17f706547ed0a9ac266b79fcfce43f3))
