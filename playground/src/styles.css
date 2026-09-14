@@ -64,7 +64,7 @@ h3 {
 }
 .app-sidebar {
   position: fixed;
-  inset: 0 auto 0 0;
+  inset: var(--td-comp-size-xxxl) auto 0 0;
   z-index: 100;
   background: var(--td-bg-color-container);
   border-right: 1px solid var(--td-component-stroke);
@@ -72,16 +72,22 @@ h3 {
   flex-direction: column;
 }
 .brand-logo {
-  height: 80px;
+  width: var(--rail-width);
+  height: var(--td-comp-size-xxxl);
+  min-height: var(--td-comp-size-xxxl);
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 20px;
+  margin-left: -24px;
+  padding: 0 20px;
   color: var(--td-text-color-primary);
   font-size: 19px;
   font-weight: 650;
   white-space: nowrap;
   letter-spacing: -0.5px;
+  border-right: 1px solid var(--td-component-stroke);
+  overflow: hidden;
+  flex-shrink: 0;
 }
 .brand-icon {
   display: flex;
@@ -118,11 +124,13 @@ h3 {
   margin-left: var(--rail-width);
   min-width: 0;
 }
-.app-header {
+.t-layout__header.app-header {
   position: fixed;
-  inset: 0 0 auto var(--rail-width);
+  inset: 0 0 auto 0;
   z-index: 90;
-  height: 56px;
+  height: var(--td-comp-size-xxxl);
+  min-height: var(--td-comp-size-xxxl);
+  flex-shrink: 0;
   padding: 0 24px;
   display: flex;
   align-items: center;
@@ -130,10 +138,15 @@ h3 {
   background: var(--td-bg-color-container);
   border-bottom: 1px solid var(--td-component-stroke);
 }
-.header-left {
+.header-context {
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+.nav-collapsed .brand-word {
+  display: none;
 }
 .header-actions > .t-space-item {
   display: flex;
@@ -1441,11 +1454,11 @@ h1 {
     width: 64px !important;
   }
   .brand-logo {
-    padding: 18px 14px;
+    padding: 0 14px;
     font-size: 16px;
   }
   .app-content {
-    padding: 22px;
+    padding: calc(var(--td-comp-size-xxxl) + var(--td-size-8)) 22px 22px;
   }
   .workspace-grid {
     grid-template-columns: 240px minmax(0, 1fr);
@@ -1485,7 +1498,7 @@ h1 {
   .app-sidebar.t-layout__sider {
     width: 64px !important;
   }
-  .brand-logo > span:last-child:not(.brand-icon) {
+  .brand-word {
     display: none;
   }
   .app-sidebar .t-menu__content {
@@ -1501,7 +1514,7 @@ h1 {
     display: none;
   }
   .brand-logo {
-    padding: 17px;
+    padding: 0 17px;
   }
   .sidebar-bottom {
     padding: 16px;
@@ -1547,9 +1560,16 @@ h1 {
   .app-sidebar {
     display: none;
   }
-  .app-header {
-    left: 0;
+  .t-layout__header.app-header {
     padding: 0 16px;
+  }
+  .brand-logo {
+    width: auto;
+    margin-left: -16px;
+    padding: 0 16px;
+  }
+  .header-context .t-breadcrumb {
+    display: none;
   }
   .mobile-menu.t-button,
   .mobile-settings.t-button {

@@ -249,7 +249,7 @@ export function App() {
         {t('跳到主要内容', 'Skip to main content')}
       </a>
       <Layout className={`app-shell ${collapsed ? 'nav-collapsed' : ''}`}>
-        <Layout.Aside width={collapsed ? '64px' : '208px'} className="app-sidebar">
+        <Layout.Header className="app-header">
           <a
             className="brand-logo"
             href={urlWithParams({ page: null, tab: null })}
@@ -263,8 +263,76 @@ export function App() {
             <span className="brand-icon">
               <img src={okrampLogo} alt="" aria-hidden="true" />
             </span>
-            {!collapsed && <span>OKRamp</span>}
+            <span className="brand-word">OKRamp</span>
           </a>
+          <div className="header-context">
+            <Button
+              className="mobile-menu"
+              shape="square"
+              variant="text"
+              aria-label={t('打开导航', 'Open navigation')}
+              icon={<MenuUnfoldIcon aria-hidden="true" />}
+              onClick={() => setMobileNav(true)}
+            />
+            <Breadcrumb
+              options={[
+                { content: t('设计工具', 'Design tools') },
+                { content: NAV.find((n) => n.value === page)?.label },
+              ]}
+            />
+          </div>
+          <Space size={12} align="center" className="header-actions">
+            <Tag variant="light" className="header-version">
+              OKRAMP
+            </Tag>
+            <Tooltip content={t('查看源码', 'View source')}>
+              <Button
+                aria-label={t('查看源码', 'View source')}
+                variant="text"
+                shape="square"
+                icon={<LogoGithubIcon aria-hidden="true" />}
+                href="https://github.com/Seeridia/okramp"
+                target="_blank"
+              />
+            </Tooltip>
+            <Tooltip content={t('切换为英文', 'Switch to Chinese')}>
+              <Button
+                className="language-switch"
+                aria-label={t('切换为英文', 'Switch to Chinese')}
+                variant="text"
+                onClick={() => setLocale(isZh ? 'en-US' : 'zh-CN')}
+              >
+                {isZh ? 'EN' : '中文'}
+              </Button>
+            </Tooltip>
+            <Tooltip
+              content={
+                uiMode === 'light'
+                  ? t('切换深色界面', 'Switch to dark mode')
+                  : t('切换浅色界面', 'Switch to light mode')
+              }
+            >
+              <Button
+                aria-label={
+                  uiMode === 'light'
+                    ? t('切换深色界面', 'Switch to dark mode')
+                    : t('切换浅色界面', 'Switch to light mode')
+                }
+                variant="text"
+                shape="square"
+                icon={
+                  uiMode === 'light' ? (
+                    <MoonIcon aria-hidden="true" />
+                  ) : (
+                    <SunnyIcon aria-hidden="true" />
+                  )
+                }
+                onClick={() => setUiMode(uiMode === 'light' ? 'dark' : 'light')}
+              />
+            </Tooltip>
+          </Space>
+        </Layout.Header>
+        <Layout.Aside width={collapsed ? '64px' : '208px'} className="app-sidebar">
           {navigation}
           <div className="sidebar-bottom">
             <Button
@@ -287,74 +355,6 @@ export function App() {
           </div>
         </Layout.Aside>
         <Layout className="main-layout">
-          <Layout.Header className="app-header">
-            <div className="header-left">
-              <Button
-                className="mobile-menu"
-                shape="square"
-                variant="text"
-                aria-label={t('打开导航', 'Open navigation')}
-                icon={<MenuUnfoldIcon aria-hidden="true" />}
-                onClick={() => setMobileNav(true)}
-              />
-              <Breadcrumb
-                options={[
-                  { content: t('设计工具', 'Design tools') },
-                  { content: NAV.find((n) => n.value === page)?.label },
-                ]}
-              />
-            </div>
-            <Space size={12} align="center" className="header-actions">
-              <Tag variant="light" className="header-version">
-                OKRAMP
-              </Tag>
-              <Tooltip content={t('查看源码', 'View source')}>
-                <Button
-                  aria-label={t('查看源码', 'View source')}
-                  variant="text"
-                  shape="square"
-                  icon={<LogoGithubIcon aria-hidden="true" />}
-                  href="https://github.com/Seeridia/okramp"
-                  target="_blank"
-                />
-              </Tooltip>
-              <Tooltip content={t('切换为英文', 'Switch to Chinese')}>
-                <Button
-                  className="language-switch"
-                  aria-label={t('切换为英文', 'Switch to Chinese')}
-                  variant="text"
-                  onClick={() => setLocale(isZh ? 'en-US' : 'zh-CN')}
-                >
-                  {isZh ? 'EN' : '中文'}
-                </Button>
-              </Tooltip>
-              <Tooltip
-                content={
-                  uiMode === 'light'
-                    ? t('切换深色界面', 'Switch to dark mode')
-                    : t('切换浅色界面', 'Switch to light mode')
-                }
-              >
-                <Button
-                  aria-label={
-                    uiMode === 'light'
-                      ? t('切换深色界面', 'Switch to dark mode')
-                      : t('切换浅色界面', 'Switch to light mode')
-                  }
-                  variant="text"
-                  shape="square"
-                  icon={
-                    uiMode === 'light' ? (
-                      <MoonIcon aria-hidden="true" />
-                    ) : (
-                      <SunnyIcon aria-hidden="true" />
-                    )
-                  }
-                  onClick={() => setUiMode(uiMode === 'light' ? 'dark' : 'light')}
-                />
-              </Tooltip>
-            </Space>
-          </Layout.Header>
           <Layout.Content className="app-content" id="main-content">
             {page !== 'guide' && (
               <div className="page-heading">
