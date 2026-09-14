@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.4.0
+
+- docs: reorganize guides and refresh open source documentation ([315a17d](https://github.com/Seeridia/okramp/commit/315a17d2c17f706547ed0a9ac266b79fcfce43f3))
+- chore: format documentation sources for Vite+ checks ([c431e97](https://github.com/Seeridia/okramp/commit/c431e976a0ffb533a043c4da9dc54a8f4d6f5e97))
+- style: increase TDesign border radius tokens ([d5ba6e4](https://github.com/Seeridia/okramp/commit/d5ba6e4750f1e8f863095ebfc4a8a38d9f2e347f))
+- feat: add OKRamp brand logo ([89924c2](https://github.com/Seeridia/okramp/commit/89924c2714fb12ea6f31180552989257043249fa))
+- refactor: move branding into full-width header ([32cc7c0](https://github.com/Seeridia/okramp/commit/32cc7c063a65ae317b9ce5ad3fcc7bb691f82b1f))
+- style: simplify header brand spacing ([05f4779](https://github.com/Seeridia/okramp/commit/05f477915c3e7c9eb341986e3f0db4f4f7ecd6da))
+- feat: update OKRamp brand assets ([bf739a6](https://github.com/Seeridia/okramp/commit/bf739a6ddb15673aefc7326742a4d7f66228a42f))
+
 ## 0.3.0
 
 - feat: migrate to okramp and extract TDesign adapter ([dc59b25](https://github.com/Seeridia/okramp/commit/dc59b257f4176e2fb40a02b4f4c6c2138c6f304d))
