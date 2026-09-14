@@ -1,5 +1,7 @@
 # OKRamp
 
+![](docs/images/cover.webp)
+
 [![npm version](https://img.shields.io/npm/v/%40okramp%2Fcore?label=%40okramp%2Fcore&color=0052D9)](https://www.npmjs.com/package/@okramp/core)
 [![CI](https://github.com/Seeridia/okramp/actions/workflows/ci.yml/badge.svg)](https://github.com/Seeridia/okramp/actions/workflows/ci.yml)
 [![License MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
